@@ -50,21 +50,21 @@ export default function Index() {
       <div className="hidden lg:block absolute top-1/3 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '2s' }} />
 
       <Card className="w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-        <CardHeader className="space-y-1 text-center pb-6">
-          <div className="flex items-center justify-center mb-4">
+        <CardHeader className="space-y-1 text-center pb-4 sm:pb-6">
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <Wifi className="h-3 w-3 text-white" />
+              <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <Wifi className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
               </div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             PHP Radius Admin
           </CardTitle>
-          <CardDescription className="text-slate-600">
+          <CardDescription className="text-slate-600 text-sm sm:text-base">
             Internet Service Provider Management Portal
           </CardDescription>
         </CardHeader>
