@@ -169,8 +169,8 @@ export default function UserPortal() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  PHP Radius Internet
-                </h1>
+                NetSafi Internet
+              </h1>
                 <p className="text-sm text-slate-500">High-Speed Internet Access</p>
               </div>
             </div>
