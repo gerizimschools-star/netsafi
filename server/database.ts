@@ -58,12 +58,12 @@ export const initializeDatabase = async () => {
     // Check if users table exists
     const tableCheck = await query(`
       SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
         AND table_name = 'users'
       );
     `);
-    
+
     if (!tableCheck.rows[0].exists) {
       console.log('Database tables not found. Please run the schema.sql file to set up the database.');
       console.log('You can run: psql -d php_radius_db -f database/schema.sql');
@@ -71,7 +71,8 @@ export const initializeDatabase = async () => {
       console.log('Database tables found. Database is ready.');
     }
   } catch (error) {
-    console.error('Database initialization error:', error);
+    console.warn('PostgreSQL database not available. The app will use mock data.');
+    console.log('To set up PostgreSQL, see database/README.md for instructions.');
   }
 };
 
