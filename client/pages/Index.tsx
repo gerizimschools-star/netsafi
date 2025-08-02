@@ -156,24 +156,24 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="h-4 w-4 text-blue-600" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                 </div>
-                <span className="text-xs text-slate-600 font-medium">User Management</span>
+                <span className="text-xs text-slate-600 font-medium leading-tight">User Management</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Wifi className="h-4 w-4 text-green-600" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Wifi className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                 </div>
-                <span className="text-xs text-slate-600 font-medium">Network Control</span>
+                <span className="text-xs text-slate-600 font-medium leading-tight">Network Control</span>
               </div>
               <div className="flex flex-col items-center space-y-1">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-purple-600" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
                 </div>
-                <span className="text-xs text-slate-600 font-medium">Billing System</span>
+                <span className="text-xs text-slate-600 font-medium leading-tight">Billing System</span>
               </div>
             </div>
           </div>
