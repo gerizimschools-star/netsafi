@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Shield, Wifi, Activity, Lock } from "lucide-react";
 
 export default function Index() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     ispId: "",
     username: "",
