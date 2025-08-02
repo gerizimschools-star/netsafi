@@ -41,15 +41,15 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 lg:p-8">
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-      
-      {/* Background decorative elements */}
-      <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-60 animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-32 h-32 bg-indigo-200 rounded-full opacity-40 animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/3 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '2s' }} />
 
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+      {/* Background decorative elements - hidden on mobile for cleaner look */}
+      <div className="hidden md:block absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-60 animate-pulse" />
+      <div className="hidden md:block absolute bottom-20 right-20 w-32 h-32 bg-indigo-200 rounded-full opacity-40 animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="hidden lg:block absolute top-1/3 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '2s' }} />
+
+      <Card className="w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center pb-6">
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
