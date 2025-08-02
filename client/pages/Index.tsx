@@ -64,10 +64,10 @@ export default function Index() {
             </div>
           </div>
           <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            PHP Radius Admin
+            NetSafi Billing
           </CardTitle>
           <CardDescription className="text-slate-600 text-sm sm:text-base">
-            Internet Service Provider Management Portal
+            Internet Service Provider Billing System
           </CardDescription>
         </CardHeader>
 
