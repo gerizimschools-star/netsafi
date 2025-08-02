@@ -426,7 +426,7 @@ export default function UserPortal() {
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                   <Wifi className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-bold">PHP Radius</span>
+                <span className="text-lg font-bold">NetSafi</span>
               </div>
               <p className="text-slate-400 text-sm">
                 Providing fast, reliable internet access across Kenya with affordable pay-as-you-use plans.
