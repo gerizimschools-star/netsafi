@@ -27,11 +27,11 @@ export default function Index() {
     setTimeout(() => {
       if (!formData.ispId || !formData.username || !formData.password) {
         setError("All fields are required");
+        setIsLoading(false);
       } else {
-        // Success case - in real app, this would redirect to dashboard
-        alert("Login successful! Redirecting to dashboard...");
+        // Success case - redirect to dashboard
+        navigate("/dashboard");
       }
-      setIsLoading(false);
     }, 1000);
   };
 
