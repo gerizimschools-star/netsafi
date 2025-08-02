@@ -69,7 +69,7 @@ export default function Index() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           {error && (
             <Alert variant="destructive" className="border-red-200 bg-red-50">
               <Lock className="h-4 w-4" />
