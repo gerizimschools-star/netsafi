@@ -71,7 +71,7 @@ export default function ResellerPortal() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Reseller Portal
+              NetSafi Reseller Portal
             </CardTitle>
             <CardDescription className="text-slate-600">
               Access your reseller dashboard
