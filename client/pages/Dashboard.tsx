@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   Users, 
   Wifi, 
@@ -22,7 +23,6 @@ import {
   TrendingDown,
   Bell,
   Search,
-  Filter,
   Download,
   Plus,
   LogOut,
@@ -32,12 +32,10 @@ import {
   Trash2,
   Eye,
   Smartphone,
-  CreditCard,
   CheckCircle,
   XCircle,
   Clock,
   Router,
-  Signal,
   RefreshCw,
   Send,
   User,
@@ -50,187 +48,159 @@ import {
   BarChart3,
   Pause,
   Play,
-  MessageSquare
+  MessageSquare,
+  Ticket,
+  UserCheck,
+  CreditCard,
+  Palette,
+  Lock,
+  Unlock,
+  Server,
+  Timer,
+  Coins,
+  Building,
+  Users2,
+  Key,
+  FileText,
+  Gauge
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [showEditUserDialog, setShowEditUserDialog] = useState(false);
-  const [showMessageDialog, setShowMessageDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "New Router Connected", message: "Nairobi Central Router is now online", type: "success", time: "2 min ago", read: false },
+    { id: 2, title: "Low Credit Alert", message: "Reseller 'Nairobi Tech' has low credit", type: "warning", time: "5 min ago", read: false },
+    { id: 3, title: "Payment Received", message: "KES 50 received via M-Pesa", type: "success", time: "10 min ago", read: true },
+    { id: 4, title: "User Session Expired", message: "John Mwangi's 1-hour session ended", type: "info", time: "15 min ago", read: true }
+  ]);
 
-  // Mock data for the dashboard - updated with KES currency
+  // Mock data
   const [stats, setStats] = useState({
-    activeUsers: 1248,
-    totalRevenue: 2284000,
-    networkUptime: 99.8,
-    pendingInvoices: 23,
-    monthlyGrowth: 12,
-    revenueGrowth: 8,
-    dataUsage: 15.6,
-    newUsersToday: 47
+    activeUsers: 324,
+    totalRevenue: 85600,
+    activeRouters: 5,
+    pendingVouchers: 23,
+    dailyPlans: 156,
+    resellers: 12
   });
 
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Mwangi", phone: "+254712345678", plan: "Premium", status: "Active", usage: "12.5 GB", lastSeen: "2 min ago", amount: 2500, location: "Nairobi", joinDate: "2023-12-15", email: "john.mwangi@email.com" },
-    { id: 2, name: "Grace Njeri", phone: "+254723456789", plan: "Standard", status: "Active", usage: "8.2 GB", lastSeen: "5 min ago", amount: 1500, location: "Mombasa", joinDate: "2024-01-02", email: "grace.njeri@email.com" },
-    { id: 3, name: "Peter Ochieng", phone: "+254734567890", plan: "Basic", status: "Expired", usage: "3.1 GB", lastSeen: "1 hour ago", amount: 800, location: "Kisumu", joinDate: "2023-11-20", email: "peter.ochieng@email.com" },
-    { id: 4, name: "Mary Wanjiku", phone: "+254745678901", plan: "Premium", status: "Active", usage: "15.8 GB", lastSeen: "10 min ago", amount: 2500, location: "Nakuru", joinDate: "2024-01-10", email: "mary.wanjiku@email.com" },
-    { id: 5, name: "David Kamau", phone: "+254756789012", plan: "Standard", status: "Suspended", usage: "0 GB", lastSeen: "2 days ago", amount: 1500, location: "Eldoret", joinDate: "2023-12-01", email: "david.kamau@email.com" },
-    { id: 6, name: "Susan Achieng", phone: "+254767890123", plan: "Premium", status: "Active", usage: "18.2 GB", lastSeen: "1 min ago", amount: 2500, location: "Nairobi", joinDate: "2024-01-05", email: "susan.achieng@email.com" },
-    { id: 7, name: "Samuel Kiprop", phone: "+254778901234", plan: "Basic", status: "Active", usage: "4.5 GB", lastSeen: "30 min ago", amount: 800, location: "Eldoret", joinDate: "2024-01-12", email: "samuel.kiprop@email.com" }
+  const [timePlans, setTimePlans] = useState([
+    { id: 1, name: "1 Hour Basic", duration: 1, price: 10, speed_down: 5, speed_up: 2, category: "hourly", active: true },
+    { id: 2, name: "2 Hour Standard", duration: 2, price: 18, speed_down: 10, speed_up: 5, category: "hourly", active: true },
+    { id: 3, name: "4 Hour Premium", duration: 4, price: 35, speed_down: 20, speed_up: 10, category: "hourly", active: true },
+    { id: 4, name: "Daily Basic", duration: 24, price: 50, speed_down: 5, speed_up: 2, category: "daily", active: true },
+    { id: 5, name: "Daily Standard", duration: 24, price: 80, speed_down: 10, speed_up: 5, category: "daily", active: true },
+    { id: 6, name: "Daily Premium", duration: 24, price: 120, speed_down: 20, speed_up: 10, category: "daily", active: true }
   ]);
 
-  const [invoices, setInvoices] = useState([
-    { id: "INV-001", customer: "John Mwangi", phone: "+254712345678", amount: 2500, status: "Paid", date: "2024-01-15", paymentMethod: "M-Pesa", dueDate: "2024-01-31" },
-    { id: "INV-002", customer: "Grace Njeri", phone: "+254723456789", amount: 1500, status: "Pending", date: "2024-01-14", paymentMethod: "Pending", dueDate: "2024-01-28" },
-    { id: "INV-003", customer: "Peter Ochieng", phone: "+254734567890", amount: 800, status: "Overdue", date: "2024-01-10", paymentMethod: "Failed", dueDate: "2024-01-24" },
-    { id: "INV-004", customer: "Mary Wanjiku", phone: "+254745678901", amount: 2500, status: "Paid", date: "2024-01-12", paymentMethod: "Airtel Money", dueDate: "2024-01-26" },
-    { id: "INV-005", customer: "David Kamau", phone: "+254756789012", amount: 1500, status: "Pending", date: "2024-01-16", paymentMethod: "Pending", dueDate: "2024-01-30" },
-    { id: "INV-006", customer: "Susan Achieng", phone: "+254767890123", amount: 2500, status: "Paid", date: "2024-01-17", paymentMethod: "M-Pesa", dueDate: "2024-02-01" }
+  const [routers, setRouters] = useState([
+    { id: 1, name: "Nairobi Central", ip: "192.168.1.1", status: "Online", users: 89, model: "RB4011iGS+", location: "Nairobi", lastSync: "2 min ago" },
+    { id: 2, name: "Mombasa Branch", ip: "192.168.2.1", status: "Online", users: 67, model: "RB4011iGS+", location: "Mombasa", lastSync: "3 min ago" },
+    { id: 3, name: "Kisumu Office", ip: "192.168.3.1", status: "Maintenance", users: 0, model: "RB3011UiAS", location: "Kisumu", lastSync: "30 min ago" },
+    { id: 4, name: "Nakuru Hub", ip: "192.168.4.1", status: "Online", users: 45, model: "RB3011UiAS", location: "Nakuru", lastSync: "1 min ago" },
+    { id: 5, name: "Eldoret Station", ip: "192.168.5.1", status: "Online", users: 56, model: "RB2011UiAS", location: "Eldoret", lastSync: "4 min ago" }
   ]);
 
-  const [networkStats, setNetworkStats] = useState([
-    { location: "Nairobi Central", status: "Online", users: 324, bandwidth: 85, latency: "12ms", uptime: 99.9, lastUpdate: "1 min ago" },
-    { location: "Mombasa", status: "Online", users: 198, bandwidth: 72, latency: "18ms", uptime: 98.5, lastUpdate: "2 min ago" },
-    { location: "Kisumu", status: "Maintenance", users: 156, bandwidth: 0, latency: "N/A", uptime: 0, lastUpdate: "5 min ago" },
-    { location: "Nakuru", status: "Online", users: 234, bandwidth: 68, latency: "15ms", uptime: 99.2, lastUpdate: "1 min ago" },
-    { location: "Eldoret", status: "Online", users: 178, bandwidth: 91, latency: "10ms", uptime: 99.7, lastUpdate: "3 min ago" }
+  const [resellers, setResellers] = useState([
+    { id: 1, username: "nairobi_tech", company: "Nairobi Tech Solutions", contact: "James Kimani", email: "james@naitech.com", phone: "+254701234567", location: "Nairobi", commission: 15, credit: 50000, status: "Active", permissions: ["users", "vouchers", "plans"] },
+    { id: 2, username: "coast_internet", company: "Coast Internet Services", contact: "Fatma Said", email: "fatma@coastnet.com", phone: "+254702345678", location: "Mombasa", commission: 12, credit: 30000, status: "Active", permissions: ["users", "vouchers"] },
+    { id: 3, username: "lake_connect", company: "Lake Connect Ltd", contact: "Peter Odhiambo", email: "peter@lakeconnect.com", phone: "+254703456789", location: "Kisumu", commission: 10, credit: 5000, status: "Suspended", permissions: ["users"] }
   ]);
 
-  const paymentMethods = [
-    { name: "M-Pesa", icon: "📱", available: true, fee: "1%" },
-    { name: "Airtel Money", icon: "📲", available: true, fee: "1.5%" },
-    { name: "T-Kash", icon: "💳", available: true, fee: "2%" },
-    { name: "Bank Transfer", icon: "🏦", available: true, fee: "0%" }
-  ];
+  const [vouchers, setVouchers] = useState([
+    { id: 1, code: "HOUR001", planName: "1 Hour Basic", amount: 10, status: "Unused", reseller: "Nairobi Tech", createdAt: "2024-01-15", expiresAt: "2024-02-15" },
+    { id: 2, code: "HOUR002", planName: "2 Hour Standard", amount: 18, status: "Used", reseller: "Coast Internet", createdAt: "2024-01-14", expiresAt: "2024-02-14" },
+    { id: 3, code: "DAY001", planName: "Daily Basic", amount: 50, status: "Unused", reseller: "Lake Connect", createdAt: "2024-01-16", expiresAt: "2024-02-16" }
+  ]);
 
-  const plans = [
-    { name: "Basic", price: 800, features: ["5 GB Data", "Basic Support", "Standard Speed"] },
-    { name: "Standard", price: 1500, features: ["15 GB Data", "Priority Support", "High Speed", "Free Router"] },
-    { name: "Premium", price: 2500, features: ["Unlimited Data", "24/7 Support", "Maximum Speed", "Free Router", "Static IP"] }
-  ];
+  const [activeSessions, setActiveSessions] = useState([
+    { id: 1, username: "john_mwangi", plan: "1 Hour Basic", router: "Nairobi Central", timeLeft: "45:23", dataUsed: "125 MB", ip: "192.168.1.100" },
+    { id: 2, username: "grace_njeri", plan: "Daily Premium", router: "Mombasa Branch", timeLeft: "18:45:12", dataUsed: "2.1 GB", ip: "192.168.2.150" },
+    { id: 3, username: "peter_ochieng", plan: "2 Hour Standard", router: "Nakuru Hub", timeLeft: "1:15:30", dataUsed: "450 MB", ip: "192.168.4.75" }
+  ]);
+
+  const permissionsList = ["users", "invoices", "vouchers", "plans", "routers", "reports", "settings"];
 
   const navItems = [
     { name: "Overview", icon: Activity, active: activeTab === "overview" },
+    { name: "Plans", icon: Timer, active: activeTab === "plans" },
+    { name: "Routers", icon: Router, active: activeTab === "routers" },
+    { name: "Sessions", icon: Zap, active: activeTab === "sessions" },
+    { name: "Resellers", icon: Users2, active: activeTab === "resellers" },
+    { name: "Vouchers", icon: Ticket, active: activeTab === "vouchers" },
     { name: "Users", icon: Users, active: activeTab === "users" },
-    { name: "Network", icon: Wifi, active: activeTab === "network" },
-    { name: "Billing", icon: DollarSign, active: activeTab === "invoices" },
+    { name: "Portal", icon: Globe, active: activeTab === "portal" },
     { name: "Settings", icon: Settings, active: activeTab === "settings" }
   ];
 
-  // Auto-refresh functionality
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats(prev => ({
-        ...prev,
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 3) - 1,
-        totalRevenue: prev.totalRevenue + Math.floor(Math.random() * 1000),
-        networkUptime: 99.5 + Math.random() * 0.5
-      }));
-    }, 30000); // Update every 30 seconds
+  const unreadNotifications = notifications.filter(n => !n.read).length;
 
-    return () => clearInterval(interval);
-  }, []);
+  const handleLogout = () => {
+    navigate("/");
+  };
 
-  const handleAddUser = (userData) => {
-    const newUser = {
-      id: users.length + 1,
-      ...userData,
-      status: "Active",
-      usage: "0 GB",
-      lastSeen: "Just now",
-      joinDate: new Date().toISOString().split('T')[0],
-      email: `${userData.name.toLowerCase().replace(' ', '.')}@email.com`
+  const handleCreatePlan = (formData) => {
+    const newPlan = {
+      id: timePlans.length + 1,
+      name: formData.get('name'),
+      duration: parseInt(formData.get('duration')),
+      price: parseInt(formData.get('price')),
+      speed_down: parseInt(formData.get('speed_down')),
+      speed_up: parseInt(formData.get('speed_up')),
+      category: formData.get('category'),
+      active: true
     };
-    setUsers([...users, newUser]);
-    setShowAddUserDialog(false);
+    setTimePlans([...timePlans, newPlan]);
+    setShowAddDialog(false);
   };
 
-  const handleEditUser = (userData) => {
-    setUsers(users.map(user => 
-      user.id === selectedUser.id ? { ...user, ...userData } : user
+  const handleCreateReseller = (formData) => {
+    const newReseller = {
+      id: resellers.length + 1,
+      username: formData.get('username'),
+      company: formData.get('company'),
+      contact: formData.get('contact'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      location: formData.get('location'),
+      commission: parseFloat(formData.get('commission')),
+      credit: 0,
+      status: "Active",
+      permissions: []
+    };
+    setResellers([...resellers, newReseller]);
+    setShowAddDialog(false);
+  };
+
+  const handleCreateRouter = (formData) => {
+    const newRouter = {
+      id: routers.length + 1,
+      name: formData.get('name'),
+      ip: formData.get('ip'),
+      status: "Online",
+      users: 0,
+      model: formData.get('model'),
+      location: formData.get('location'),
+      lastSync: "Just now"
+    };
+    setRouters([...routers, newRouter]);
+    setShowAddDialog(false);
+  };
+
+  const markNotificationRead = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
     ));
-    setShowEditUserDialog(false);
-    setSelectedUser(null);
   };
-
-  const handleDeleteUser = (userId) => {
-    setUsers(users.filter(user => user.id !== userId));
-  };
-
-  const handleSuspendUser = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, status: "Suspended" } : user
-    ));
-  };
-
-  const handleActivateUser = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, status: "Active" } : user
-    ));
-  };
-
-  const handleProcessPayment = (invoiceId, method) => {
-    setInvoices(invoices.map(invoice => 
-      invoice.id === invoiceId 
-        ? { ...invoice, status: "Paid", paymentMethod: method }
-        : invoice
-    ));
-    setShowPaymentDialog(false);
-    setSelectedInvoice(null);
-  };
-
-  const handleGenerateInvoice = (userId) => {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      const newInvoice = {
-        id: `INV-${String(invoices.length + 1).padStart(3, '0')}`,
-        customer: user.name,
-        phone: user.phone,
-        amount: user.amount,
-        status: "Pending",
-        date: new Date().toISOString().split('T')[0],
-        paymentMethod: "Pending",
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-      };
-      setInvoices([...invoices, newInvoice]);
-    }
-  };
-
-  const handleRefreshNetwork = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setNetworkStats(prev => prev.map(stat => ({
-        ...stat,
-        bandwidth: Math.max(0, stat.bandwidth + Math.floor(Math.random() * 10) - 5),
-        users: Math.max(0, stat.users + Math.floor(Math.random() * 20) - 10),
-        lastUpdate: "Just now"
-      })));
-      setIsRefreshing(false);
-    }, 2000);
-  };
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.phone.includes(searchTerm) ||
-                         user.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "all" || user.status.toLowerCase() === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
-
-  const filteredInvoices = invoices.filter(invoice => {
-    const matchesFilter = filterStatus === "all" || invoice.status.toLowerCase() === filterStatus;
-    return matchesFilter;
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -261,7 +231,7 @@ export default function Dashboard() {
               key={item.name}
               onClick={() => {
                 setActiveTab(item.name.toLowerCase());
-                setSidebarOpen(false); // Close sidebar on mobile after selection
+                setSidebarOpen(false);
               }}
               className={`w-full flex items-center space-x-2 lg:space-x-3 px-2 lg:px-3 py-2 rounded-lg text-left transition-colors text-sm lg:text-base ${
                 item.active 
@@ -276,12 +246,10 @@ export default function Dashboard() {
         </nav>
 
         <div className="absolute bottom-4 left-3 lg:left-4 right-3 lg:right-4">
-          <Link to="/">
-            <Button variant="outline" className="w-full text-sm lg:text-base" size="sm">
-              <LogOut className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              Sign Out
-            </Button>
-          </Link>
+          <Button onClick={handleLogout} variant="outline" className="w-full text-sm lg:text-base" size="sm">
+            <LogOut className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </div>
 
@@ -306,40 +274,89 @@ export default function Dashboard() {
             >
               <Menu className="h-4 w-4" />
             </Button>
-            <h1 className="text-lg lg:text-xl font-semibold text-slate-800">Admin Dashboard</h1>
+            <h1 className="text-lg lg:text-xl font-semibold text-slate-800">ISP Admin Dashboard</h1>
           </div>
 
           <div className="flex items-center space-x-2 lg:space-x-4">
-            <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10">
-              <Bell className="h-4 w-4 lg:h-5 lg:w-5" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 lg:w-8 lg:h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-xs lg:text-sm font-medium text-blue-700">A</span>
-              </div>
-              <span className="hidden sm:block text-sm font-medium text-slate-700">Administrator</span>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-10 lg:w-10 relative">
+                  <Bell className="h-4 w-4 lg:h-5 lg:w-5" />
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadNotifications}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {notifications.slice(0, 5).map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={`p-3 cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
+                    onClick={() => markNotificationRead(notification.id)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          notification.type === 'success' ? 'bg-green-500' :
+                          notification.type === 'warning' ? 'bg-yellow-500' :
+                          notification.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                        }`} />
+                        <span className="font-medium text-sm">{notification.title}</span>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-1">{notification.message}</p>
+                      <p className="text-xs text-slate-400 mt-1">{notification.time}</p>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-xs lg:text-sm font-medium text-blue-700">A</span>
+                  </div>
+                  <span className="hidden sm:block text-sm font-medium text-slate-700">Administrator</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Preferences
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
         {/* Dashboard content */}
         <main className="p-3 lg:p-6 space-y-4 lg:space-y-6">
           {/* Stats grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 lg:gap-4">
             <Card>
               <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs lg:text-sm text-slate-600">Active Users</p>
-                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.activeUsers.toLocaleString()}</p>
-                    <div className="flex items-center text-xs lg:text-sm text-green-600 mt-1">
-                      <TrendingUp className="h-2.5 w-2.5 lg:h-3 lg:w-3 mr-1" />
-                      +{stats.monthlyGrowth}%
-                    </div>
+                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.activeUsers}</p>
                   </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Users className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
-                  </div>
+                  <Users className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
@@ -350,14 +367,8 @@ export default function Dashboard() {
                   <div>
                     <p className="text-xs lg:text-sm text-slate-600">Revenue</p>
                     <p className="text-lg lg:text-2xl font-bold text-slate-900">KES {Math.floor(stats.totalRevenue / 1000)}K</p>
-                    <div className="flex items-center text-xs lg:text-sm text-green-600 mt-1">
-                      <TrendingUp className="h-2.5 w-2.5 lg:h-3 lg:w-3 mr-1" />
-                      +{stats.revenueGrowth}%
-                    </div>
                   </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
-                  </div>
+                  <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
                 </div>
               </CardContent>
             </Card>
@@ -366,15 +377,10 @@ export default function Dashboard() {
               <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs lg:text-sm text-slate-600">Uptime</p>
-                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.networkUptime.toFixed(1)}%</p>
-                    <div className="w-full bg-slate-200 rounded-full h-1.5 lg:h-2 mt-2">
-                      <div className="bg-green-500 h-1.5 lg:h-2 rounded-full" style={{ width: `${stats.networkUptime}%` }} />
-                    </div>
+                    <p className="text-xs lg:text-sm text-slate-600">Routers</p>
+                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.activeRouters}</p>
                   </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <Wifi className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
-                  </div>
+                  <Router className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
@@ -383,16 +389,34 @@ export default function Dashboard() {
               <CardContent className="p-3 lg:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs lg:text-sm text-slate-600">Pending</p>
-                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.pendingInvoices}</p>
-                    <div className="flex items-center text-xs lg:text-sm text-red-600 mt-1">
-                      <TrendingDown className="h-2.5 w-2.5 lg:h-3 lg:w-3 mr-1" />
-                      -3
-                    </div>
+                    <p className="text-xs lg:text-sm text-slate-600">Plans</p>
+                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.dailyPlans}</p>
                   </div>
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                    <Activity className="h-4 w-4 lg:h-5 lg:w-5 text-red-600" />
+                  <Timer className="h-4 w-4 lg:h-5 lg:w-5 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-3 lg:p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs lg:text-sm text-slate-600">Resellers</p>
+                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.resellers}</p>
                   </div>
+                  <Users2 className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-3 lg:p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs lg:text-sm text-slate-600">Vouchers</p>
+                    <p className="text-lg lg:text-2xl font-bold text-slate-900">{stats.pendingVouchers}</p>
+                  </div>
+                  <Ticket className="h-4 w-4 lg:h-5 lg:w-5 text-pink-600" />
                 </div>
               </CardContent>
             </Card>
@@ -403,9 +427,12 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <TabsList className="inline-flex w-max min-w-full lg:w-auto h-9 lg:h-10">
                 <TabsTrigger value="overview" className="text-xs lg:text-sm px-2 lg:px-3">Overview</TabsTrigger>
-                <TabsTrigger value="users" className="text-xs lg:text-sm px-2 lg:px-3">Users</TabsTrigger>
-                <TabsTrigger value="invoices" className="text-xs lg:text-sm px-2 lg:px-3">Billing</TabsTrigger>
-                <TabsTrigger value="network" className="text-xs lg:text-sm px-2 lg:px-3">Network</TabsTrigger>
+                <TabsTrigger value="plans" className="text-xs lg:text-sm px-2 lg:px-3">Plans</TabsTrigger>
+                <TabsTrigger value="routers" className="text-xs lg:text-sm px-2 lg:px-3">Routers</TabsTrigger>
+                <TabsTrigger value="sessions" className="text-xs lg:text-sm px-2 lg:px-3">Sessions</TabsTrigger>
+                <TabsTrigger value="resellers" className="text-xs lg:text-sm px-2 lg:px-3">Resellers</TabsTrigger>
+                <TabsTrigger value="vouchers" className="text-xs lg:text-sm px-2 lg:px-3">Vouchers</TabsTrigger>
+                <TabsTrigger value="portal" className="text-xs lg:text-sm px-2 lg:px-3">Portal</TabsTrigger>
                 <TabsTrigger value="settings" className="text-xs lg:text-sm px-2 lg:px-3">Settings</TabsTrigger>
               </TabsList>
             </div>
@@ -413,598 +440,199 @@ export default function Dashboard() {
             {/* Overview Tab */}
             <TabsContent value="overview" className="grid gap-3 lg:gap-4 lg:grid-cols-2">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 lg:pb-4">
-                  <div>
-                    <CardTitle className="text-base lg:text-lg">Recent Users</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Latest user activity and status</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab("users")} className="text-xs lg:text-sm">
-                    <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                    View All
-                  </Button>
+                <CardHeader>
+                  <CardTitle className="text-base lg:text-lg">Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 lg:space-y-3">
-                  {users.slice(0, 4).map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-2 lg:p-3 bg-slate-50 rounded-lg">
-                      <div className="flex items-center space-x-2 lg:space-x-3">
-                        <div className="w-7 h-7 lg:w-8 lg:h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs lg:text-sm font-medium text-blue-700">{user.name[0]}</span>
+                <CardContent className="space-y-3">
+                  {notifications.slice(0, 4).map((notification) => (
+                    <div key={notification.id} className="flex items-center space-x-3 p-2 lg:p-3 bg-slate-50 rounded-lg">
+                      <div className={`w-2 h-2 rounded-full ${
+                        notification.type === 'success' ? 'bg-green-500' :
+                        notification.type === 'warning' ? 'bg-yellow-500' :
+                        notification.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                      }`} />
+                      <div className="flex-1">
+                        <p className="font-medium text-xs lg:text-sm">{notification.title}</p>
+                        <p className="text-xs text-slate-500">{notification.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base lg:text-lg">Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Online Routers</span>
+                    <span className="font-bold text-green-600">{routers.filter(r => r.status === 'Online').length}/{routers.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Active Sessions</span>
+                    <span className="font-bold text-blue-600">{activeSessions.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Unused Vouchers</span>
+                    <span className="font-bold text-orange-600">{vouchers.filter(v => v.status === 'Unused').length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Active Resellers</span>
+                    <span className="font-bold text-purple-600">{resellers.filter(r => r.status === 'Active').length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Plans Tab */}
+            <TabsContent value="plans">
+              <Card>
+                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                  <div>
+                    <CardTitle className="text-base lg:text-lg">Time-Based Plans</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Manage hourly, daily, and monthly internet plans</CardDescription>
+                  </div>
+                  <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="text-xs lg:text-sm">
+                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                        Add Plan
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md mx-auto">
+                      <DialogHeader>
+                        <DialogTitle>Create New Plan</DialogTitle>
+                        <DialogDescription>Create a time-based internet plan</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleCreatePlan(new FormData(e.target));
+                      }} className="space-y-4">
+                        <div>
+                          <Label htmlFor="name">Plan Name</Label>
+                          <Input name="name" placeholder="e.g., 1 Hour Basic" required />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="duration">Duration (hours)</Label>
+                            <Input name="duration" type="number" placeholder="1" required />
+                          </div>
+                          <div>
+                            <Label htmlFor="price">Price (KES)</Label>
+                            <Input name="price" type="number" placeholder="10" required />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="speed_down">Download (Mbps)</Label>
+                            <Input name="speed_down" type="number" placeholder="5" required />
+                          </div>
+                          <div>
+                            <Label htmlFor="speed_up">Upload (Mbps)</Label>
+                            <Input name="speed_up" type="number" placeholder="2" required />
+                          </div>
                         </div>
                         <div>
-                          <p className="font-medium text-xs lg:text-sm">{user.name}</p>
-                          <p className="text-xs text-slate-500">{user.plan} - {user.location}</p>
+                          <Label htmlFor="category">Category</Label>
+                          <Select name="category" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Expired' ? 'destructive' : 'secondary'} className="text-xs">
-                          {user.status}
-                        </Badge>
-                        <p className="text-xs text-slate-500 mt-1">{user.usage}</p>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 lg:pb-4">
-                  <div>
-                    <CardTitle className="text-base lg:text-lg">Recent Invoices</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Latest billing and payments</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab("invoices")} className="text-xs lg:text-sm">
-                    <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                    View All
-                  </Button>
-                </CardHeader>
-                <CardContent className="space-y-2 lg:space-y-3">
-                  {invoices.slice(0, 4).map((invoice) => (
-                    <div key={invoice.id} className="flex items-center justify-between p-2 lg:p-3 bg-slate-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-xs lg:text-sm">{invoice.id}</p>
-                        <p className="text-xs text-slate-500">{invoice.customer}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-xs lg:text-sm">KES {invoice.amount.toLocaleString()}</p>
-                        <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'} className="text-xs">
-                          {invoice.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Users Tab */}
-            <TabsContent value="users">
-              <Card>
-                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 pb-3 lg:pb-4">
-                  <div>
-                    <CardTitle className="text-base lg:text-lg">User Management</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Manage your ISP customers and their accounts</CardDescription>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" className="text-xs lg:text-sm">
-                          <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                          Add User
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md mx-auto">
-                        <DialogHeader>
-                          <DialogTitle className="text-base lg:text-lg">Add New User</DialogTitle>
-                          <DialogDescription className="text-xs lg:text-sm">Create a new customer account</DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={(e) => {
-                          e.preventDefault();
-                          const formData = new FormData(e.target);
-                          const planPrice = plans.find(p => p.name === formData.get('plan'))?.price || 0;
-                          handleAddUser({
-                            name: formData.get('name'),
-                            phone: formData.get('phone'),
-                            plan: formData.get('plan'),
-                            location: formData.get('location'),
-                            amount: planPrice
-                          });
-                        }} className="space-y-3 lg:space-y-4">
-                          <div>
-                            <Label htmlFor="name" className="text-xs lg:text-sm">Full Name</Label>
-                            <Input name="name" placeholder="e.g. John Mwangi" required className="text-xs lg:text-sm" />
-                          </div>
-                          <div>
-                            <Label htmlFor="phone" className="text-xs lg:text-sm">Phone Number</Label>
-                            <Input name="phone" placeholder="+254712345678" required className="text-xs lg:text-sm" />
-                          </div>
-                          <div>
-                            <Label htmlFor="location" className="text-xs lg:text-sm">Location</Label>
-                            <Input name="location" placeholder="e.g. Nairobi" required className="text-xs lg:text-sm" />
-                          </div>
-                          <div>
-                            <Label htmlFor="plan" className="text-xs lg:text-sm">Plan</Label>
-                            <Select name="plan" required>
-                              <SelectTrigger className="text-xs lg:text-sm">
-                                <SelectValue placeholder="Select plan" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {plans.map(plan => (
-                                  <SelectItem key={plan.name} value={plan.name}>
-                                    {plan.name} - KES {plan.price.toLocaleString()}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <Button type="submit" className="w-full text-xs lg:text-sm">Create User</Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                        <Button type="submit" className="w-full">Create Plan</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col sm:flex-row gap-2 mb-3 lg:mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2 top-2 lg:top-2.5 h-3 w-3 lg:h-4 lg:w-4 text-slate-400" />
-                      <Input
-                        placeholder="Search users..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8 lg:pl-10 text-xs lg:text-sm"
-                      />
-                    </div>
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                      <SelectTrigger className="w-full sm:w-32 text-xs lg:text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="suspended">Suspended</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2 lg:space-y-3">
-                    {filteredUsers.map((user) => (
-                      <div key={user.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-3 lg:p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
-                        <div className="flex items-center space-x-3 lg:space-x-4">
-                          <div className="w-9 h-9 lg:w-10 lg:h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-blue-700">{user.name[0]}</span>
+                  <div className="grid gap-3 lg:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {timePlans.map((plan) => (
+                      <Card key={plan.id} className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <Badge variant={plan.active ? "default" : "secondary"}>
+                            {plan.active ? "Active" : "Inactive"}
+                          </Badge>
+                          <Badge variant="outline">{plan.category}</Badge>
+                        </div>
+                        <h3 className="font-semibold text-base mb-2">{plan.name}</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">Duration:</span>
+                            <span className="font-medium">{plan.duration}h</span>
                           </div>
-                          <div>
-                            <p className="font-medium text-sm lg:text-base">{user.name}</p>
-                            <p className="text-xs lg:text-sm text-slate-500">{user.phone} • {user.location}</p>
-                            <p className="text-xs text-slate-400">{user.plan} Plan - KES {user.amount.toLocaleString()}/month</p>
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">Price:</span>
+                            <span className="font-medium text-green-600">KES {plan.price}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">Speed:</span>
+                            <span className="font-medium">{plan.speed_down}/{plan.speed_up} Mbps</span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between lg:justify-end space-x-2 lg:space-x-3">
-                          <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Expired' ? 'destructive' : 'secondary'} className="text-xs">
-                            {user.status}
-                          </Badge>
-                          <div className="flex space-x-1">
-                            {user.status === 'Active' ? (
-                              <Button variant="outline" size="sm" onClick={() => handleSuspendUser(user.id)} className="text-xs px-2">
-                                <Pause className="h-3 w-3 mr-1" />
-                                Suspend
-                              </Button>
-                            ) : (
-                              <Button variant="outline" size="sm" onClick={() => handleActivateUser(user.id)} className="text-xs px-2">
-                                <Play className="h-3 w-3 mr-1" />
-                                Activate
-                              </Button>
-                            )}
-                            <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)} className="px-2">
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-md mx-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="text-base lg:text-lg">Edit User</DialogTitle>
-                                  <DialogDescription className="text-xs lg:text-sm">Update user information</DialogDescription>
-                                </DialogHeader>
-                                {selectedUser && (
-                                  <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const formData = new FormData(e.target);
-                                    const planPrice = plans.find(p => p.name === formData.get('plan'))?.price || selectedUser.amount;
-                                    handleEditUser({
-                                      name: formData.get('name'),
-                                      phone: formData.get('phone'),
-                                      plan: formData.get('plan'),
-                                      location: formData.get('location'),
-                                      amount: planPrice
-                                    });
-                                  }} className="space-y-3 lg:space-y-4">
-                                    <div>
-                                      <Label htmlFor="name" className="text-xs lg:text-sm">Full Name</Label>
-                                      <Input name="name" defaultValue={selectedUser.name} required className="text-xs lg:text-sm" />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="phone" className="text-xs lg:text-sm">Phone Number</Label>
-                                      <Input name="phone" defaultValue={selectedUser.phone} required className="text-xs lg:text-sm" />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="location" className="text-xs lg:text-sm">Location</Label>
-                                      <Input name="location" defaultValue={selectedUser.location} required className="text-xs lg:text-sm" />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="plan" className="text-xs lg:text-sm">Plan</Label>
-                                      <Select name="plan" defaultValue={selectedUser.plan} required>
-                                        <SelectTrigger className="text-xs lg:text-sm">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {plans.map(plan => (
-                                            <SelectItem key={plan.name} value={plan.name}>
-                                              {plan.name} - KES {plan.price.toLocaleString()}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <Button type="submit" className="w-full text-xs lg:text-sm">Update User</Button>
-                                  </form>
-                                )}
-                              </DialogContent>
-                            </Dialog>
-                            <Button variant="outline" size="sm" onClick={() => handleGenerateInvoice(user.id)} className="px-2">
-                              <DollarSign className="h-3 w-3" />
-                            </Button>
-                            <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)} className="px-2">
-                                  <MessageSquare className="h-3 w-3" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-md mx-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="text-base lg:text-lg">Send Message</DialogTitle>
-                                  <DialogDescription className="text-xs lg:text-sm">
-                                    Send SMS to {selectedUser?.name} ({selectedUser?.phone})
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <form onSubmit={(e) => {
-                                  e.preventDefault();
-                                  alert('Message sent successfully!');
-                                  setShowMessageDialog(false);
-                                }} className="space-y-3 lg:space-y-4">
-                                  <div>
-                                    <Label htmlFor="message" className="text-xs lg:text-sm">Message</Label>
-                                    <Textarea 
-                                      name="message" 
-                                      placeholder="Type your message here..."
-                                      required 
-                                      className="text-xs lg:text-sm"
-                                    />
-                                  </div>
-                                  <Button type="submit" className="w-full text-xs lg:text-sm">
-                                    <Send className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                                    Send Message
-                                  </Button>
-                                </form>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Billing Tab */}
-            <TabsContent value="invoices">
-              <Card>
-                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 pb-3 lg:pb-4">
-                  <div>
-                    <CardTitle className="text-base lg:text-lg">Invoice & Payment Management</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Handle billing, payments, and mobile money transactions</CardDescription>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button variant="outline" size="sm" className="text-xs lg:text-sm">
-                      <Download className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                      Export
-                    </Button>
-                    <Button size="sm" className="text-xs lg:text-sm">
-                      <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                      New Invoice
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4 lg:mb-6">
-                    {paymentMethods.map((method) => (
-                      <Card key={method.name} className="p-3 lg:p-4">
-                        <div className="text-center">
-                          <div className="text-xl lg:text-2xl mb-1 lg:mb-2">{method.icon}</div>
-                          <p className="font-medium text-xs lg:text-sm">{method.name}</p>
-                          <Badge variant={method.available ? "default" : "secondary"} className="mt-1 text-xs">
-                            {method.available ? "Available" : "Unavailable"}
-                          </Badge>
-                          <p className="text-xs text-slate-500 mt-1">Fee: {method.fee}</p>
+                        <div className="flex space-x-2 mt-4">
+                          <Button variant="outline" size="sm" className="flex-1">
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex-1">
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
                         </div>
                       </Card>
                     ))}
                   </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2 mb-3 lg:mb-4">
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                      <SelectTrigger className="w-full sm:w-32 text-xs lg:text-sm">
-                        <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="overdue">Overdue</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2 lg:space-y-3">
-                    {filteredInvoices.map((invoice) => (
-                      <div key={invoice.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-3 lg:p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
-                        <div className="flex items-center space-x-3 lg:space-x-4">
-                          <div className="w-9 h-9 lg:w-10 lg:h-10 bg-green-100 rounded-full flex items-center justify-center">
-                            <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm lg:text-base">{invoice.id}</p>
-                            <p className="text-xs lg:text-sm text-slate-500">{invoice.customer} • {invoice.phone}</p>
-                            <p className="text-xs text-slate-400">Due: {invoice.dueDate}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between lg:justify-end space-x-3 lg:space-x-4">
-                          <div className="text-right">
-                            <p className="font-medium text-sm lg:text-base">KES {invoice.amount.toLocaleString()}</p>
-                            <p className="text-xs text-slate-500">{invoice.paymentMethod}</p>
-                          </div>
-                          <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'} className="text-xs">
-                            {invoice.status}
-                          </Badge>
-                          {invoice.status === 'Pending' && (
-                            <Dialog open={showPaymentDialog && selectedInvoice?.id === invoice.id} onOpenChange={setShowPaymentDialog}>
-                              <DialogTrigger asChild>
-                                <Button size="sm" onClick={() => setSelectedInvoice(invoice)} className="text-xs px-2">
-                                  <Smartphone className="h-3 w-3 mr-1" />
-                                  Pay
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-md mx-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="text-base lg:text-lg">Process Mobile Payment</DialogTitle>
-                                  <DialogDescription className="text-xs lg:text-sm">
-                                    Process payment for {selectedInvoice?.customer} - KES {selectedInvoice?.amount.toLocaleString()}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-3 lg:space-y-4">
-                                  <Alert>
-                                    <Smartphone className="h-3 w-3 lg:h-4 lg:w-4" />
-                                    <AlertDescription className="text-xs lg:text-sm">
-                                      Payment will be sent to {selectedInvoice?.phone}
-                                    </AlertDescription>
-                                  </Alert>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {paymentMethods.map((method) => (
-                                      <Button
-                                        key={method.name}
-                                        variant="outline"
-                                        onClick={() => handleProcessPayment(selectedInvoice?.id, method.name)}
-                                        className="p-3 lg:p-4 h-auto flex flex-col text-xs lg:text-sm"
-                                      >
-                                        <span className="text-lg lg:text-xl mb-1">{method.icon}</span>
-                                        <span>{method.name}</span>
-                                      </Button>
-                                    ))}
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Network Tab */}
-            <TabsContent value="network">
-              <Card>
-                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-                  <div>
-                    <CardTitle className="text-base lg:text-lg">Network Monitoring</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Monitor network performance and connectivity across all locations</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={handleRefreshNetwork} disabled={isRefreshing} className="text-xs lg:text-sm">
-                    <RefreshCw className={`h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 lg:gap-4">
-                    {networkStats.map((location, index) => (
-                      <div key={index} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-3 lg:p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
-                        <div className="flex items-center space-x-3 lg:space-x-4">
-                          <div className={`w-9 h-9 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center ${
-                            location.status === 'Online' ? 'bg-green-100' : 
-                            location.status === 'Maintenance' ? 'bg-yellow-100' : 'bg-red-100'
-                          }`}>
-                            <Router className={`h-4 w-4 lg:h-5 lg:w-5 ${
-                              location.status === 'Online' ? 'text-green-600' : 
-                              location.status === 'Maintenance' ? 'text-yellow-600' : 'text-red-600'
-                            }`} />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm lg:text-base">{location.location}</p>
-                            <p className="text-xs lg:text-sm text-slate-500">{location.users} active users</p>
-                            <p className="text-xs text-slate-400">Updated: {location.lastUpdate}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between lg:justify-end space-x-4 lg:space-x-6">
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">Bandwidth</p>
-                            <div className="flex items-center space-x-1">
-                              <p className="font-medium text-xs lg:text-sm">{location.bandwidth}%</p>
-                              <Progress value={location.bandwidth} className="w-12 h-1.5" />
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">Latency</p>
-                            <p className="font-medium text-xs lg:text-sm">{location.latency}</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">Uptime</p>
-                            <p className="font-medium text-xs lg:text-sm">{location.uptime}%</p>
-                          </div>
-                          <Badge variant={
-                            location.status === 'Online' ? 'default' : 
-                            location.status === 'Maintenance' ? 'secondary' : 'destructive'
-                          } className="text-xs">
-                            {location.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Settings Tab */}
-            <TabsContent value="settings">
-              <div className="grid gap-4 lg:gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base lg:text-lg">Payment Configuration</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Configure mobile payment integrations</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 lg:space-y-4">
-                    {paymentMethods.map((method) => (
-                      <div key={method.name} className="flex items-center justify-between p-3 lg:p-4 bg-slate-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-lg lg:text-xl">{method.icon}</span>
-                          <div>
-                            <p className="font-medium text-sm lg:text-base">{method.name}</p>
-                            <p className="text-xs lg:text-sm text-slate-500">Transaction fee: {method.fee}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch checked={method.available} />
-                          <Badge variant={method.available ? "default" : "secondary"} className="text-xs">
-                            {method.available ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base lg:text-lg">System Settings</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Configure general system preferences</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 lg:space-y-6">
-                    <div className="grid gap-3 lg:gap-4 sm:grid-cols-2">
-                      <div>
-                        <Label className="text-xs lg:text-sm">Default Currency</Label>
-                        <Select defaultValue="KES">
-                          <SelectTrigger className="mt-1 text-xs lg:text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="KES">Kenyan Shillings (KES)</SelectItem>
-                            <SelectItem value="USD">US Dollars (USD)</SelectItem>
-                            <SelectItem value="EUR">Euros (EUR)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs lg:text-sm">Time Zone</Label>
-                        <Select defaultValue="EAT">
-                          <SelectTrigger className="mt-1 text-xs lg:text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="EAT">East Africa Time (EAT)</SelectItem>
-                            <SelectItem value="UTC">UTC</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 lg:space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-sm lg:text-base">Auto-refresh Dashboard</p>
-                          <p className="text-xs lg:text-sm text-slate-500">Automatically update statistics every 30 seconds</p>
-                        </div>
-                        <Switch defaultChecked />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-sm lg:text-base">SMS Notifications</p>
-                          <p className="text-xs lg:text-sm text-slate-500">Send SMS notifications for important events</p>
-                        </div>
-                        <Switch defaultChecked />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-sm lg:text-base">Email Reports</p>
-                          <p className="text-xs lg:text-sm text-slate-500">Send daily summary reports via email</p>
-                        </div>
-                        <Switch />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base lg:text-lg">Plan Configuration</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Manage internet plans and pricing</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 lg:space-y-4">
-                      {plans.map((plan) => (
-                        <div key={plan.name} className="p-3 lg:p-4 bg-slate-50 rounded-lg">
-                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
-                            <div>
-                              <p className="font-medium text-sm lg:text-base">{plan.name} Plan</p>
-                              <p className="text-lg lg:text-xl font-bold text-slate-900">KES {plan.price.toLocaleString()}/month</p>
-                            </div>
-                            <Button variant="outline" size="sm" className="text-xs lg:text-sm">
-                              <Edit className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                              Edit Plan
-                            </Button>
-                          </div>
-                          <div className="mt-2">
-                            <p className="text-xs lg:text-sm text-slate-600 mb-1">Features:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {plan.features.map((feature, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {feature}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+            {/* Continue with remaining tabs... */}
+            {/* I'll add the remaining tabs in the next part to keep the response manageable */}
+            
           </Tabs>
         </main>
       </div>
+
+      {/* Profile Settings Dialog */}
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogDescription>Update your account information</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4">
+            <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input name="fullName" defaultValue="Administrator" />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input name="email" type="email" defaultValue="admin@phpradius.com" />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input name="phone" defaultValue="+254700000000" />
+            </div>
+            <div>
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input name="currentPassword" type="password" />
+            </div>
+            <div>
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input name="newPassword" type="password" />
+            </div>
+            <Button type="submit" className="w-full">Update Profile</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
