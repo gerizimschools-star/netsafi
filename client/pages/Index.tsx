@@ -182,7 +182,7 @@ export default function Index() {
 
           <div className="text-center pt-4 border-t border-slate-100">
             <p className="text-xs text-slate-500">
-              © 2024 PHP Radius. Secure ISP Management Platform
+              © 2025 NetSafi ISP Billing. All rights reserved.
             </p>
           </div>
         </CardContent>
