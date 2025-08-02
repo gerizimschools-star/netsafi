@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   Users, 
@@ -62,7 +63,14 @@ import {
   Users2,
   Key,
   FileText,
-  Gauge
+  Gauge,
+  Power,
+  Copy,
+  Star,
+  Upload,
+  Signal,
+  Info,
+  Link as LinkIcon
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -74,8 +82,11 @@ export default function Dashboard() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Router Connected", message: "Nairobi Central Router is now online", type: "success", time: "2 min ago", read: false },
     { id: 2, title: "Low Credit Alert", message: "Reseller 'Nairobi Tech' has low credit", type: "warning", time: "5 min ago", read: false },
@@ -111,21 +122,76 @@ export default function Dashboard() {
   ]);
 
   const [resellers, setResellers] = useState([
-    { id: 1, username: "nairobi_tech", company: "Nairobi Tech Solutions", contact: "James Kimani", email: "james@naitech.com", phone: "+254701234567", location: "Nairobi", commission: 15, credit: 50000, status: "Active", permissions: ["users", "vouchers", "plans"] },
-    { id: 2, username: "coast_internet", company: "Coast Internet Services", contact: "Fatma Said", email: "fatma@coastnet.com", phone: "+254702345678", location: "Mombasa", commission: 12, credit: 30000, status: "Active", permissions: ["users", "vouchers"] },
-    { id: 3, username: "lake_connect", company: "Lake Connect Ltd", contact: "Peter Odhiambo", email: "peter@lakeconnect.com", phone: "+254703456789", location: "Kisumu", commission: 10, credit: 5000, status: "Suspended", permissions: ["users"] }
+    { 
+      id: 1, 
+      username: "nairobi_tech", 
+      password: "netsafi2025", 
+      company: "Nairobi Tech Solutions", 
+      contact: "James Kimani", 
+      email: "james@naitech.com", 
+      phone: "+254701234567", 
+      location: "Nairobi", 
+      commission: 15, 
+      credit: 50000, 
+      status: "Active", 
+      permissions: ["users", "vouchers", "plans"] 
+    },
+    { 
+      id: 2, 
+      username: "coast_internet", 
+      password: "coast123", 
+      company: "Coast Internet Services", 
+      contact: "Fatma Said", 
+      email: "fatma@coastnet.com", 
+      phone: "+254702345678", 
+      location: "Mombasa", 
+      commission: 12, 
+      credit: 30000, 
+      status: "Active", 
+      permissions: ["users", "vouchers"] 
+    },
+    { 
+      id: 3, 
+      username: "lake_connect", 
+      password: "lake456", 
+      company: "Lake Connect Ltd", 
+      contact: "Peter Odhiambo", 
+      email: "peter@lakeconnect.com", 
+      phone: "+254703456789", 
+      location: "Kisumu", 
+      commission: 10, 
+      credit: 5000, 
+      status: "Suspended", 
+      permissions: ["users"] 
+    }
+  ]);
+
+  const [users, setUsers] = useState([
+    { id: 1, name: "John Mwangi", phone: "+254712345678", plan: "Premium", status: "Active", usage: "12.5 GB", lastSeen: "2 min ago", amount: 2500, location: "Nairobi", joinDate: "2023-12-15", email: "john.mwangi@email.com" },
+    { id: 2, name: "Grace Njeri", phone: "+254723456789", plan: "Standard", status: "Active", usage: "8.2 GB", lastSeen: "5 min ago", amount: 1500, location: "Mombasa", joinDate: "2024-01-02", email: "grace.njeri@email.com" },
+    { id: 3, name: "Peter Ochieng", phone: "+254734567890", plan: "Basic", status: "Expired", usage: "3.1 GB", lastSeen: "1 hour ago", amount: 800, location: "Kisumu", joinDate: "2023-11-20", email: "peter.ochieng@email.com" },
+    { id: 4, name: "Mary Wanjiku", phone: "+254745678901", plan: "Premium", status: "Active", usage: "15.8 GB", lastSeen: "10 min ago", amount: 2500, location: "Nakuru", joinDate: "2024-01-10", email: "mary.wanjiku@email.com" },
+    { id: 5, name: "David Kamau", phone: "+254756789012", plan: "Standard", status: "Suspended", usage: "0 GB", lastSeen: "2 days ago", amount: 1500, location: "Eldoret", joinDate: "2023-12-01", email: "david.kamau@email.com" }
   ]);
 
   const [vouchers, setVouchers] = useState([
     { id: 1, code: "HOUR001", planName: "1 Hour Basic", amount: 10, status: "Unused", reseller: "Nairobi Tech", createdAt: "2024-01-15", expiresAt: "2024-02-15" },
     { id: 2, code: "HOUR002", planName: "2 Hour Standard", amount: 18, status: "Used", reseller: "Coast Internet", createdAt: "2024-01-14", expiresAt: "2024-02-14" },
-    { id: 3, code: "DAY001", planName: "Daily Basic", amount: 50, status: "Unused", reseller: "Lake Connect", createdAt: "2024-01-16", expiresAt: "2024-02-16" }
+    { id: 3, code: "DAY001", planName: "Daily Basic", amount: 50, status: "Unused", reseller: "Lake Connect", createdAt: "2024-01-16", expiresAt: "2024-02-16" },
+    { id: 4, code: "PREM001", planName: "Daily Premium", amount: 120, status: "Unused", reseller: "Nairobi Tech", createdAt: "2024-01-17", expiresAt: "2024-02-17" }
   ]);
 
   const [activeSessions, setActiveSessions] = useState([
     { id: 1, username: "john_mwangi", plan: "1 Hour Basic", router: "Nairobi Central", timeLeft: "45:23", dataUsed: "125 MB", ip: "192.168.1.100" },
     { id: 2, username: "grace_njeri", plan: "Daily Premium", router: "Mombasa Branch", timeLeft: "18:45:12", dataUsed: "2.1 GB", ip: "192.168.2.150" },
     { id: 3, username: "peter_ochieng", plan: "2 Hour Standard", router: "Nakuru Hub", timeLeft: "1:15:30", dataUsed: "450 MB", ip: "192.168.4.75" }
+  ]);
+
+  const [invoices, setInvoices] = useState([
+    { id: "INV-001", customer: "John Mwangi", phone: "+254712345678", amount: 2500, status: "Paid", date: "2024-01-15", paymentMethod: "M-Pesa", dueDate: "2024-01-31" },
+    { id: "INV-002", customer: "Grace Njeri", phone: "+254723456789", amount: 1500, status: "Pending", date: "2024-01-14", paymentMethod: "Pending", dueDate: "2024-01-28" },
+    { id: "INV-003", customer: "Peter Ochieng", phone: "+254734567890", amount: 800, status: "Overdue", date: "2024-01-10", paymentMethod: "Failed", dueDate: "2024-01-24" },
+    { id: "INV-004", customer: "Mary Wanjiku", phone: "+254745678901", amount: 2500, status: "Paid", date: "2024-01-12", paymentMethod: "Airtel Money", dueDate: "2024-01-26" }
   ]);
 
   const permissionsList = ["users", "invoices", "vouchers", "plans", "routers", "reports", "settings"];
@@ -138,6 +204,7 @@ export default function Dashboard() {
     { name: "Resellers", icon: Users2, active: activeTab === "resellers" },
     { name: "Vouchers", icon: Ticket, active: activeTab === "vouchers" },
     { name: "Users", icon: Users, active: activeTab === "users" },
+    { name: "Invoices", icon: DollarSign, active: activeTab === "invoices" },
     { name: "Portal", icon: Globe, active: activeTab === "portal" },
     { name: "Settings", icon: Settings, active: activeTab === "settings" }
   ];
@@ -167,6 +234,7 @@ export default function Dashboard() {
     const newReseller = {
       id: resellers.length + 1,
       username: formData.get('username'),
+      password: formData.get('password') || 'default123',
       company: formData.get('company'),
       contact: formData.get('contact'),
       email: formData.get('email'),
@@ -202,6 +270,23 @@ export default function Dashboard() {
     ));
   };
 
+  const handleTerminateSession = (sessionId: number) => {
+    setActiveSessions(activeSessions.filter(session => session.id !== sessionId));
+  };
+
+  const handleRouterAction = (routerId: number, action: string) => {
+    setRouters(routers.map(router => 
+      router.id === routerId 
+        ? { ...router, status: action === 'restart' ? 'Online' : action === 'maintenance' ? 'Maintenance' : router.status }
+        : router
+    ));
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Sidebar */}
@@ -212,7 +297,7 @@ export default function Dashboard() {
               <Shield className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
             <span className="text-base lg:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              PHP Radius
+              NetSafi Billing
             </span>
           </div>
           <Button
@@ -274,7 +359,7 @@ export default function Dashboard() {
             >
               <Menu className="h-4 w-4" />
             </Button>
-            <h1 className="text-lg lg:text-xl font-semibold text-slate-800">ISP Admin Dashboard</h1>
+            <h1 className="text-lg lg:text-xl font-semibold text-slate-800">NetSafi ISP Admin Dashboard</h1>
           </div>
 
           <div className="flex items-center space-x-2 lg:space-x-4">
@@ -330,6 +415,10 @@ export default function Dashboard() {
                 <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
                   <User className="mr-2 h-4 w-4" />
                   Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowCredentialsDialog(true)}>
+                  <Key className="mr-2 h-4 w-4" />
+                  Reseller Credentials
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
@@ -432,6 +521,8 @@ export default function Dashboard() {
                 <TabsTrigger value="sessions" className="text-xs lg:text-sm px-2 lg:px-3">Sessions</TabsTrigger>
                 <TabsTrigger value="resellers" className="text-xs lg:text-sm px-2 lg:px-3">Resellers</TabsTrigger>
                 <TabsTrigger value="vouchers" className="text-xs lg:text-sm px-2 lg:px-3">Vouchers</TabsTrigger>
+                <TabsTrigger value="users" className="text-xs lg:text-sm px-2 lg:px-3">Users</TabsTrigger>
+                <TabsTrigger value="invoices" className="text-xs lg:text-sm px-2 lg:px-3">Invoices</TabsTrigger>
                 <TabsTrigger value="portal" className="text-xs lg:text-sm px-2 lg:px-3">Portal</TabsTrigger>
                 <TabsTrigger value="settings" className="text-xs lg:text-sm px-2 lg:px-3">Settings</TabsTrigger>
               </TabsList>
@@ -493,7 +584,7 @@ export default function Dashboard() {
                     <CardTitle className="text-base lg:text-lg">Time-Based Plans</CardTitle>
                     <CardDescription className="text-xs lg:text-sm">Manage hourly, daily, and monthly internet plans</CardDescription>
                   </div>
-                  <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                  <Dialog open={showAddDialog && activeTab === 'plans'} onOpenChange={setShowAddDialog}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="text-xs lg:text-sm">
                         <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
@@ -594,11 +685,589 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            {/* Continue with remaining tabs... */}
-            {/* I'll add the remaining tabs in the next part to keep the response manageable */}
-            
+            {/* Routers Tab */}
+            <TabsContent value="routers">
+              <Card>
+                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                  <div>
+                    <CardTitle className="text-base lg:text-lg">Router Management</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Manage Mikrotik and other routers</CardDescription>
+                  </div>
+                  <Dialog open={showAddDialog && activeTab === 'routers'} onOpenChange={setShowAddDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="text-xs lg:text-sm">
+                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                        Add Router
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md mx-auto">
+                      <DialogHeader>
+                        <DialogTitle>Add New Router</DialogTitle>
+                        <DialogDescription>Connect a new Mikrotik or compatible router</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleCreateRouter(new FormData(e.target));
+                      }} className="space-y-4">
+                        <div>
+                          <Label htmlFor="name">Router Name</Label>
+                          <Input name="name" placeholder="e.g., Nairobi Central" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="ip">IP Address</Label>
+                          <Input name="ip" placeholder="192.168.1.1" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="location">Location</Label>
+                          <Input name="location" placeholder="e.g., Nairobi" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="model">Router Model</Label>
+                          <Select name="model" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="RB4011iGS+">RB4011iGS+</SelectItem>
+                              <SelectItem value="RB3011UiAS-RM">RB3011UiAS-RM</SelectItem>
+                              <SelectItem value="RB2011UiAS-2HnD-IN">RB2011UiAS-2HnD-IN</SelectItem>
+                              <SelectItem value="CCR1009-7G-1C-1S+">CCR1009-7G-1C-1S+</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="username">Username</Label>
+                            <Input name="username" defaultValue="admin" required />
+                          </div>
+                          <div>
+                            <Label htmlFor="password">Password</Label>
+                            <Input name="password" type="password" required />
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full">Add Router</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {routers.map((router) => (
+                      <div key={router.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            router.status === 'Online' ? 'bg-green-100' : 
+                            router.status === 'Maintenance' ? 'bg-yellow-100' : 'bg-red-100'
+                          }`}>
+                            <Router className={`h-5 w-5 ${
+                              router.status === 'Online' ? 'text-green-600' : 
+                              router.status === 'Maintenance' ? 'text-yellow-600' : 'text-red-600'
+                            }`} />
+                          </div>
+                          <div>
+                            <p className="font-medium">{router.name}</p>
+                            <p className="text-sm text-slate-500">{router.ip} • {router.location}</p>
+                            <p className="text-xs text-slate-400">{router.model} • {router.users} users • Updated: {router.lastSync}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={router.status === 'Online' ? 'default' : router.status === 'Maintenance' ? 'secondary' : 'destructive'}>
+                            {router.status}
+                          </Badge>
+                          <div className="flex space-x-1">
+                            <Button variant="outline" size="sm" onClick={() => handleRouterAction(router.id, 'restart')}>
+                              <RefreshCw className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleRouterAction(router.id, 'maintenance')}>
+                              <Settings className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Sessions Tab */}
+            <TabsContent value="sessions">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base lg:text-lg">Active Sessions</CardTitle>
+                  <CardDescription className="text-xs lg:text-sm">Monitor and manage active user sessions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {activeSessions.map((session) => (
+                      <div key={session.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Zap className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{session.username}</p>
+                            <p className="text-sm text-slate-500">{session.plan} • {session.router}</p>
+                            <p className="text-xs text-slate-400">IP: {session.ip} • Data used: {session.dataUsed}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="font-medium text-green-600">{session.timeLeft}</p>
+                            <p className="text-xs text-slate-500">Time remaining</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => handleTerminateSession(session.id)}>
+                            <Power className="h-3 w-3 mr-1" />
+                            End
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Resellers Tab */}
+            <TabsContent value="resellers">
+              <Card>
+                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                  <div>
+                    <CardTitle className="text-base lg:text-lg">Reseller Management</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Manage resellers, permissions, and credit balances</CardDescription>
+                  </div>
+                  <Dialog open={showAddDialog && activeTab === 'resellers'} onOpenChange={setShowAddDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="text-xs lg:text-sm">
+                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                        Add Reseller
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md mx-auto">
+                      <DialogHeader>
+                        <DialogTitle>Add New Reseller</DialogTitle>
+                        <DialogDescription>Create a new reseller account with permissions</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleCreateReseller(new FormData(e.target));
+                      }} className="space-y-4">
+                        <div>
+                          <Label htmlFor="username">Username</Label>
+                          <Input name="username" placeholder="reseller_username" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="password">Password</Label>
+                          <Input name="password" placeholder="secure_password" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="company">Company Name</Label>
+                          <Input name="company" placeholder="Company Ltd" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="contact">Contact Person</Label>
+                          <Input name="contact" placeholder="John Doe" required />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input name="email" type="email" placeholder="email@company.com" required />
+                          </div>
+                          <div>
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input name="phone" placeholder="+254700000000" required />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="location">Location</Label>
+                            <Input name="location" placeholder="Nairobi" required />
+                          </div>
+                          <div>
+                            <Label htmlFor="commission">Commission %</Label>
+                            <Input name="commission" type="number" placeholder="15" required />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-3 block">Permissions</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {permissionsList.map((permission) => (
+                              <div key={permission} className="flex items-center space-x-2">
+                                <Checkbox id={permission} name="permissions" value={permission} />
+                                <Label htmlFor={permission} className="text-sm capitalize">{permission}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full">Create Reseller</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {resellers.map((reseller) => (
+                      <div key={reseller.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Building className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{reseller.company}</p>
+                            <p className="text-sm text-slate-500">{reseller.contact} • {reseller.email}</p>
+                            <p className="text-xs text-slate-400">
+                              Username: {reseller.username} • Commission: {reseller.commission}% • Credit: KES {reseller.credit.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={reseller.status === 'Active' ? 'default' : 'destructive'}>
+                            {reseller.status}
+                          </Badge>
+                          <div className="flex space-x-1">
+                            <Button variant="outline" size="sm">
+                              <CreditCard className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Vouchers Tab */}
+            <TabsContent value="vouchers">
+              <Card>
+                <CardHeader className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                  <div>
+                    <CardTitle className="text-base lg:text-lg">Voucher Management</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Generate and manage prepaid vouchers</CardDescription>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Download className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      Export
+                    </Button>
+                    <Button size="sm">
+                      <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      Generate
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {vouchers.map((voucher) => (
+                      <div key={voucher.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                            <Ticket className="h-5 w-5 text-pink-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium font-mono">{voucher.code}</p>
+                            <p className="text-sm text-slate-500">{voucher.planName} • {voucher.reseller}</p>
+                            <p className="text-xs text-slate-400">Created: {voucher.createdAt} • Expires: {voucher.expiresAt}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="font-medium">KES {voucher.amount}</p>
+                            <Badge variant={voucher.status === 'Unused' ? 'default' : voucher.status === 'Used' ? 'secondary' : 'destructive'}>
+                              {voucher.status}
+                            </Badge>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Users Tab */}
+            <TabsContent value="users">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base lg:text-lg">User Management</CardTitle>
+                  <CardDescription className="text-xs lg:text-sm">Manage customer accounts and their subscriptions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {users.map((user) => (
+                      <div key={user.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <User className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{user.name}</p>
+                            <p className="text-sm text-slate-500">{user.phone} • {user.location}</p>
+                            <p className="text-xs text-slate-400">{user.plan} Plan - KES {user.amount}/month • Usage: {user.usage}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Expired' ? 'destructive' : 'secondary'}>
+                            {user.status}
+                          </Badge>
+                          <div className="flex space-x-1">
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <MessageSquare className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Invoices Tab */}
+            <TabsContent value="invoices">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base lg:text-lg">Invoice Management</CardTitle>
+                  <CardDescription className="text-xs lg:text-sm">Handle billing, payments, and mobile money transactions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {invoices.map((invoice) => (
+                      <div key={invoice.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-slate-50 rounded-lg gap-3 lg:gap-0">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{invoice.id}</p>
+                            <p className="text-sm text-slate-500">{invoice.customer} • {invoice.phone}</p>
+                            <p className="text-xs text-slate-400">Due: {invoice.dueDate} • Method: {invoice.paymentMethod}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="font-medium">KES {invoice.amount.toLocaleString()}</p>
+                            <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'}>
+                              {invoice.status}
+                            </Badge>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Portal Tab */}
+            <TabsContent value="portal">
+              <div className="grid gap-4 lg:gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">User Portal Customization</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Customize the user plan selection interface</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="portal_title">Portal Title</Label>
+                        <Input id="portal_title" defaultValue="NetSafi Internet Portal" />
+                      </div>
+                      <div>
+                        <Label htmlFor="portal_logo">Logo URL</Label>
+                        <Input id="portal_logo" defaultValue="/images/logo.png" />
+                      </div>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="theme_color">Theme Color</Label>
+                        <div className="flex space-x-2">
+                          <Input id="theme_color" defaultValue="#3B82F6" type="color" className="w-16" />
+                          <Input defaultValue="#3B82F6" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="support_phone">Support Phone</Label>
+                        <Input id="support_phone" defaultValue="+254700000000" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="welcome_message">Welcome Message</Label>
+                      <Textarea id="welcome_message" defaultValue="Welcome to NetSafi high-speed internet service!" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">Portal Preview</p>
+                        <p className="text-sm text-slate-500">View how the portal looks to users</p>
+                      </div>
+                      <Button variant="outline" asChild>
+                        <a href="/portal" target="_blank" rel="noopener noreferrer">
+                          <LinkIcon className="h-4 w-4 mr-2" />
+                          Open Portal
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">Portal Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Auto-logout inactive users</p>
+                        <p className="text-sm text-slate-500">Automatically logout users after 5 minutes of inactivity</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Show data usage</p>
+                        <p className="text-sm text-slate-500">Display real-time data usage to users</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Enable voucher redemption</p>
+                        <p className="text-sm text-slate-500">Allow users to redeem vouchers directly</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings">
+              <div className="grid gap-4 lg:gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">System Configuration</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Configure system-wide settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="currency">Default Currency</Label>
+                        <Select defaultValue="KES">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="KES">Kenyan Shillings (KES)</SelectItem>
+                            <SelectItem value="USD">US Dollars (USD)</SelectItem>
+                            <SelectItem value="EUR">Euros (EUR)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="timezone">Timezone</Label>
+                        <Select defaultValue="EAT">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="EAT">East Africa Time (EAT)</SelectItem>
+                            <SelectItem value="UTC">UTC</SelectItem>
+                            <SelectItem value="CAT">Central Africa Time (CAT)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Auto-refresh dashboard</p>
+                          <p className="text-sm text-slate-500">Refresh statistics every 30 seconds</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">SMS notifications</p>
+                          <p className="text-sm text-slate-500">Send SMS for important events</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Email reports</p>
+                          <p className="text-sm text-slate-500">Daily summary reports via email</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">Payment Gateway Configuration</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      { name: 'M-Pesa Daraja API', status: true, icon: '📱' },
+                      { name: 'Airtel Money', status: true, icon: '📲' },
+                      { name: 'T-Kash', status: false, icon: '💳' },
+                      { name: 'PayPal', status: false, icon: '💰' }
+                    ].map((gateway) => (
+                      <div key={gateway.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{gateway.icon}</span>
+                          <div>
+                            <p className="font-medium">{gateway.name}</p>
+                            <p className="text-sm text-slate-500">Payment gateway integration</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch checked={gateway.status} />
+                          <Button variant="outline" size="sm">
+                            <Settings className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
           </Tabs>
         </main>
+
+        {/* Footer */}
+        <footer className="bg-slate-900 text-white py-6 mt-8">
+          <div className="container mx-auto px-4 text-center">
+            <div className="flex items-center justify-center space-x-3 mb-2">
+              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-lg font-bold">NetSafi ISP Billing</span>
+            </div>
+            <p className="text-sm text-slate-400">© 2025 NetSafi ISP Billing. All rights reserved.</p>
+            <p className="text-xs text-slate-500 mt-1">Powering Internet Service Providers across Kenya</p>
+          </div>
+        </footer>
       </div>
 
       {/* Profile Settings Dialog */}
@@ -615,7 +1284,7 @@ export default function Dashboard() {
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input name="email" type="email" defaultValue="admin@phpradius.com" />
+              <Input name="email" type="email" defaultValue="admin@netsafi.com" />
             </div>
             <div>
               <Label htmlFor="phone">Phone</Label>
@@ -631,6 +1300,65 @@ export default function Dashboard() {
             </div>
             <Button type="submit" className="w-full">Update Profile</Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reseller Credentials Dialog */}
+      <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+        <DialogContent className="max-w-lg mx-auto">
+          <DialogHeader>
+            <DialogTitle>Reseller Login Credentials</DialogTitle>
+            <DialogDescription>Use these credentials to access the reseller portal at /reseller</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {resellers.map((reseller) => (
+              <Card key={reseller.id} className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">{reseller.company}</h3>
+                  <Badge variant={reseller.status === 'Active' ? 'default' : 'destructive'}>
+                    {reseller.status}
+                  </Badge>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Username:</span>
+                    <div className="flex items-center space-x-2">
+                      <code className="bg-slate-100 px-2 py-1 rounded">{reseller.username}</code>
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(reseller.username)}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Password:</span>
+                    <div className="flex items-center space-x-2">
+                      <code className="bg-slate-100 px-2 py-1 rounded">{reseller.password}</code>
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(reseller.password)}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Portal URL:</span>
+                    <div className="flex items-center space-x-2">
+                      <code className="bg-slate-100 px-2 py-1 rounded text-xs">/reseller</code>
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href="/reseller" target="_blank" rel="noopener noreferrer">
+                          <LinkIcon className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Share these credentials securely with your resellers. They can access their portal at /reseller
+              </AlertDescription>
+            </Alert>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
