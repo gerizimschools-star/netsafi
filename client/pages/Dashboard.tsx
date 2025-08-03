@@ -634,7 +634,7 @@ export default function Dashboard() {
                   <User className="mr-2 h-4 w-4" />
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowCredentialsDialog(true)}>
+                <DropdownMenuItem onSelect={() => setShowCredentialsDialog(true)}>
                   <Key className="mr-2 h-4 w-4" />
                   Reseller Credentials
                 </DropdownMenuItem>
