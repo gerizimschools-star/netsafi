@@ -1619,7 +1619,7 @@ export default function Dashboard() {
 
       {/* Message Dialog */}
       <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto m-4">
           <DialogHeader>
             <DialogTitle>Send SMS Message</DialogTitle>
             <DialogDescription>
