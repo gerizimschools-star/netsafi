@@ -1839,7 +1839,7 @@ export default function Dashboard() {
 
       {/* Bank Configuration Dialog */}
       <Dialog open={showBankConfigDialog} onOpenChange={setShowBankConfigDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto m-4">
           <DialogHeader>
             <DialogTitle>Bank Paybill Configuration</DialogTitle>
             <DialogDescription>Configure Equity and KCB bank paybills</DialogDescription>
