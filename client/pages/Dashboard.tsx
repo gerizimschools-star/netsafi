@@ -1132,23 +1132,24 @@ export default function Dashboard() {
                     <CardDescription className="text-xs lg:text-sm">Customize the user plan selection interface</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 lg:grid-cols-2">
                       <div>
                         <Label htmlFor="portal_title">Portal Title</Label>
                         <Input id="portal_title" defaultValue="NetSafi Internet Portal" />
                       </div>
                       <div>
                         <Label htmlFor="portal_logo">Logo Upload</Label>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                           <Input id="portal_logo" type="file" accept="image/*" className="flex-1" />
-                          <Button variant="outline" size="sm">
-                            <Upload className="h-4 w-4" />
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Upload
                           </Button>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">Upload PNG, JPG or SVG. Max 2MB.</p>
                       </div>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 lg:grid-cols-2">
                       <div>
                         <Label htmlFor="theme_color">Theme Color</Label>
                         <div className="flex space-x-2">
@@ -1163,21 +1164,21 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <Label htmlFor="welcome_message">Welcome Message</Label>
-                      <Textarea id="welcome_message" defaultValue="Welcome to NetSafi high-speed internet service!" />
+                      <Textarea id="welcome_message" defaultValue="Welcome to NetSafi high-speed internet service!" rows={3} />
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                       <div>
                         <p className="font-medium">Portal Preview</p>
                         <p className="text-sm text-slate-500">View how the portal looks to users</p>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" asChild>
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <Button variant="outline" asChild className="w-full sm:w-auto">
                           <a href="/portal" target="_blank" rel="noopener noreferrer">
                             <LinkIcon className="h-4 w-4 mr-2" />
                             Open Portal
                           </a>
                         </Button>
-                        <Button>
+                        <Button className="w-full sm:w-auto">
                           <Save className="h-4 w-4 mr-2" />
                           Save Changes
                         </Button>
