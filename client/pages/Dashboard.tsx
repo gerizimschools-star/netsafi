@@ -1268,7 +1268,7 @@ export default function Dashboard() {
                       </div>
                     ))}
                     
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg gap-3 sm:gap-0">
                       <div className="flex items-center space-x-3">
                         <Banknote className="h-5 w-5 text-orange-600" />
                         <div>
@@ -1276,10 +1276,21 @@ export default function Dashboard() {
                           <p className="text-sm text-slate-500">Configure Equity and KCB bank paybills</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => setShowBankConfigDialog(true)}>
-                        <Settings className="h-3 w-3 mr-1" />
-                        Configure
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={bankConfig.equity.enabled || bankConfig.kcb.enabled}
+                          onCheckedChange={(checked) => {
+                            setBankConfig(prev => ({
+                              equity: { ...prev.equity, enabled: checked },
+                              kcb: { ...prev.kcb, enabled: checked }
+                            }));
+                          }}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => setShowBankConfigDialog(true)}>
+                          <Settings className="h-3 w-3 mr-1" />
+                          Configure
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
