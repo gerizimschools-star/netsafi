@@ -1984,6 +1984,86 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Payment Configuration Dialog */}
+      <Dialog open={showPaymentConfigDialog} onOpenChange={setShowPaymentConfigDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedPaymentGateway === 'mpesa' && 'M-Pesa Configuration'}
+              {selectedPaymentGateway === 'airtelMoney' && 'Airtel Money Configuration'}
+              {selectedPaymentGateway === 'tkash' && 'T-Kash Configuration'}
+              {selectedPaymentGateway === 'paypal' && 'PayPal Configuration'}
+            </DialogTitle>
+            <DialogDescription>Configure payment gateway settings</DialogDescription>
+          </DialogHeader>
+
+          {selectedPaymentGateway === 'mpesa' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handlePaymentConfigSave(new FormData(e.target));
+            }} className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox name="enabled" defaultChecked={paymentConfig.mpesa?.enabled} />
+                <Label>Enable M-Pesa Daraja API</Label>
+              </div>
+              <div>
+                <Label htmlFor="businessShortCode">Business Short Code</Label>
+                <Input name="businessShortCode" defaultValue={paymentConfig.mpesa?.businessShortCode} placeholder="174379" required />
+              </div>
+              <div>
+                <Label htmlFor="passkey">Passkey</Label>
+                <Input name="passkey" type="password" defaultValue={paymentConfig.mpesa?.passkey} placeholder="Your Daraja passkey" required />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="consumerKey">Consumer Key</Label>
+                  <Input name="consumerKey" defaultValue={paymentConfig.mpesa?.consumerKey} placeholder="Consumer key" required />
+                </div>
+                <div>
+                  <Label htmlFor="consumerSecret">Consumer Secret</Label>
+                  <Input name="consumerSecret" type="password" defaultValue={paymentConfig.mpesa?.consumerSecret} placeholder="Consumer secret" required />
+                </div>
+              </div>
+              <Button type="submit" className="w-full">Save M-Pesa Configuration</Button>
+            </form>
+          )}
+
+          {selectedPaymentGateway === 'airtelMoney' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handlePaymentConfigSave(new FormData(e.target));
+            }} className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox name="enabled" defaultChecked={paymentConfig.airtelMoney?.enabled} />
+                <Label>Enable Airtel Money</Label>
+              </div>
+              <div>
+                <Label htmlFor="clientId">Client ID</Label>
+                <Input name="clientId" defaultValue={paymentConfig.airtelMoney?.clientId} placeholder="Your client ID" required />
+              </div>
+              <div>
+                <Label htmlFor="clientSecret">Client Secret</Label>
+                <Input name="clientSecret" type="password" defaultValue={paymentConfig.airtelMoney?.clientSecret} placeholder="Your client secret" required />
+              </div>
+              <div>
+                <Label htmlFor="merchantId">Merchant ID</Label>
+                <Input name="merchantId" defaultValue={paymentConfig.airtelMoney?.merchantId} placeholder="Your merchant ID" required />
+              </div>
+              <Button type="submit" className="w-full">Save Airtel Money Configuration</Button>
+            </form>
+          )}
+
+          {(selectedPaymentGateway === 'tkash' || selectedPaymentGateway === 'paypal') && (
+            <div className="text-center py-8">
+              <p className="text-slate-500">Configuration for {selectedPaymentGateway} coming soon!</p>
+              <Button variant="outline" onClick={() => setShowPaymentConfigDialog(false)} className="mt-4">
+                Close
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
