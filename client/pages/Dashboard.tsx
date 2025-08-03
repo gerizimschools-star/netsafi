@@ -1378,7 +1378,7 @@ export default function Dashboard() {
 
       {/* Edit Dialog - Universal */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedItem ? `Edit ${editingType.charAt(0).toUpperCase() + editingType.slice(1)}` : `Add New ${editingType.charAt(0).toUpperCase() + editingType.slice(1)}`}
