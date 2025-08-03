@@ -1234,12 +1234,12 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {[
-                      { name: 'M-Pesa Daraja API', status: true, icon: '📱' },
-                      { name: 'Airtel Money', status: true, icon: '📲' },
-                      { name: 'T-Kash', status: false, icon: '💳' },
-                      { name: 'PayPal', status: false, icon: '💰' }
+                      { key: 'mpesa', name: 'M-Pesa Daraja API', icon: '📱' },
+                      { key: 'airtelMoney', name: 'Airtel Money', icon: '📲' },
+                      { key: 'tkash', name: 'T-Kash', icon: '💳' },
+                      { key: 'paypal', name: 'PayPal', icon: '💰' }
                     ].map((gateway) => (
-                      <div key={gateway.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div key={gateway.key} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg gap-3 sm:gap-0">
                         <div className="flex items-center space-x-3">
                           <span className="text-2xl">{gateway.icon}</span>
                           <div>
@@ -1248,8 +1248,20 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Switch checked={gateway.status} />
-                          <Button variant="outline" size="sm">
+                          <Switch
+                            checked={paymentConfig[gateway.key]?.enabled || false}
+                            onCheckedChange={(checked) => {
+                              setPaymentConfig(prev => ({
+                                ...prev,
+                                [gateway.key]: { ...prev[gateway.key], enabled: checked }
+                              }));
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePaymentGatewayConfig(gateway.key)}
+                          >
                             <Settings className="h-3 w-3" />
                           </Button>
                         </div>
