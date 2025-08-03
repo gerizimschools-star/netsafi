@@ -1668,14 +1668,32 @@ export default function Dashboard() {
                   <p className="font-medium">{selectedItem.paymentMethod}</p>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <Button variant="outline" className="flex-1">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleDownloadInvoice(selectedItem)}
+                  disabled={isLoading}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Download PDF
                 </Button>
-                <Button className="flex-1">
-                  <Send className="h-4 w-4 mr-2" />
-                  Send to Customer
+                <Button
+                  className="flex-1"
+                  onClick={() => handleSendInvoiceToCustomer(selectedItem)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send to Customer
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
