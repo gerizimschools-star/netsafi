@@ -1747,7 +1747,7 @@ export default function Dashboard() {
 
       {/* SMS Configuration Dialog */}
       <Dialog open={showSMSConfigDialog} onOpenChange={setShowSMSConfigDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto m-4">
           <DialogHeader>
             <DialogTitle>SMS Configuration</DialogTitle>
             <DialogDescription>Configure SMS gateway settings</DialogDescription>
