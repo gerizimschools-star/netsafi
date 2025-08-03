@@ -70,7 +70,12 @@ import {
   Upload,
   Signal,
   Info,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Save,
+  Mail,
+  MessageCircle,
+  Image,
+  Banknote
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -79,13 +84,23 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Dialog states
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [showSMSConfigDialog, setShowSMSConfigDialog] = useState(false);
+  const [showEmailConfigDialog, setShowEmailConfigDialog] = useState(false);
+  const [showBankConfigDialog, setShowBankConfigDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  
   const [selectedItem, setSelectedItem] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [editingType, setEditingType] = useState("");
 
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Router Connected", message: "Nairobi Central Router is now online", type: "success", time: "2 min ago", read: false },
@@ -114,11 +129,11 @@ export default function Dashboard() {
   ]);
 
   const [routers, setRouters] = useState([
-    { id: 1, name: "Nairobi Central", ip: "192.168.1.1", status: "Online", users: 89, model: "RB4011iGS+", location: "Nairobi", lastSync: "2 min ago" },
-    { id: 2, name: "Mombasa Branch", ip: "192.168.2.1", status: "Online", users: 67, model: "RB4011iGS+", location: "Mombasa", lastSync: "3 min ago" },
-    { id: 3, name: "Kisumu Office", ip: "192.168.3.1", status: "Maintenance", users: 0, model: "RB3011UiAS", location: "Kisumu", lastSync: "30 min ago" },
-    { id: 4, name: "Nakuru Hub", ip: "192.168.4.1", status: "Online", users: 45, model: "RB3011UiAS", location: "Nakuru", lastSync: "1 min ago" },
-    { id: 5, name: "Eldoret Station", ip: "192.168.5.1", status: "Online", users: 56, model: "RB2011UiAS", location: "Eldoret", lastSync: "4 min ago" }
+    { id: 1, name: "Nairobi Central", ip: "192.168.1.1", status: "Online", users: 89, model: "RB4011iGS+", location: "Nairobi", lastSync: "2 min ago", username: "admin", password: "mikrotik123" },
+    { id: 2, name: "Mombasa Branch", ip: "192.168.2.1", status: "Online", users: 67, model: "RB4011iGS+", location: "Mombasa", lastSync: "3 min ago", username: "admin", password: "mikrotik456" },
+    { id: 3, name: "Kisumu Office", ip: "192.168.3.1", status: "Maintenance", users: 0, model: "RB3011UiAS", location: "Kisumu", lastSync: "30 min ago", username: "admin", password: "mikrotik789" },
+    { id: 4, name: "Nakuru Hub", ip: "192.168.4.1", status: "Online", users: 45, model: "RB3011UiAS", location: "Nakuru", lastSync: "1 min ago", username: "admin", password: "mikrotik321" },
+    { id: 5, name: "Eldoret Station", ip: "192.168.5.1", status: "Online", users: 56, model: "RB2011UiAS", location: "Eldoret", lastSync: "4 min ago", username: "admin", password: "mikrotik654" }
   ]);
 
   const [resellers, setResellers] = useState([
@@ -194,6 +209,29 @@ export default function Dashboard() {
     { id: "INV-004", customer: "Mary Wanjiku", phone: "+254745678901", amount: 2500, status: "Paid", date: "2024-01-12", paymentMethod: "Airtel Money", dueDate: "2024-01-26" }
   ]);
 
+  const [smsConfig, setSmsConfig] = useState({
+    provider: "africastalking",
+    apiKey: "",
+    username: "",
+    senderId: "NetSafi",
+    enabled: true
+  });
+
+  const [emailConfig, setEmailConfig] = useState({
+    provider: "smtp",
+    host: "smtp.gmail.com",
+    port: "587",
+    username: "",
+    password: "",
+    fromEmail: "noreply@netsafi.com",
+    enabled: true
+  });
+
+  const [bankConfig, setBankConfig] = useState({
+    equity: { paybill: "247247", account: "", enabled: false },
+    kcb: { paybill: "522522", account: "", enabled: false }
+  });
+
   const permissionsList = ["users", "invoices", "vouchers", "plans", "routers", "reports", "settings"];
 
   const navItems = [
@@ -211,57 +249,88 @@ export default function Dashboard() {
 
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
+  // Event Handlers
   const handleLogout = () => {
     navigate("/");
   };
 
-  const handleCreatePlan = (formData) => {
-    const newPlan = {
-      id: timePlans.length + 1,
-      name: formData.get('name'),
-      duration: parseInt(formData.get('duration')),
-      price: parseInt(formData.get('price')),
-      speed_down: parseInt(formData.get('speed_down')),
-      speed_up: parseInt(formData.get('speed_up')),
-      category: formData.get('category'),
-      active: true
-    };
-    setTimePlans([...timePlans, newPlan]);
-    setShowAddDialog(false);
+  const handleEdit = (item, type) => {
+    setSelectedItem(item);
+    setEditingType(type);
+    setShowEditDialog(true);
   };
 
-  const handleCreateReseller = (formData) => {
-    const newReseller = {
-      id: resellers.length + 1,
-      username: formData.get('username'),
-      password: formData.get('password') || 'default123',
-      company: formData.get('company'),
-      contact: formData.get('contact'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      location: formData.get('location'),
-      commission: parseFloat(formData.get('commission')),
-      credit: 0,
-      status: "Active",
-      permissions: []
-    };
-    setResellers([...resellers, newReseller]);
-    setShowAddDialog(false);
+  const handleDelete = (id, type) => {
+    if (confirm('Are you sure you want to delete this item?')) {
+      switch(type) {
+        case 'plan':
+          setTimePlans(timePlans.filter(p => p.id !== id));
+          break;
+        case 'router':
+          setRouters(routers.filter(r => r.id !== id));
+          break;
+        case 'reseller':
+          setResellers(resellers.filter(r => r.id !== id));
+          break;
+        case 'user':
+          setUsers(users.filter(u => u.id !== id));
+          break;
+        case 'voucher':
+          setVouchers(vouchers.filter(v => v.id !== id));
+          break;
+      }
+    }
   };
 
-  const handleCreateRouter = (formData) => {
-    const newRouter = {
-      id: routers.length + 1,
-      name: formData.get('name'),
-      ip: formData.get('ip'),
-      status: "Online",
-      users: 0,
-      model: formData.get('model'),
-      location: formData.get('location'),
-      lastSync: "Just now"
-    };
-    setRouters([...routers, newRouter]);
-    setShowAddDialog(false);
+  const handleExportVouchers = () => {
+    setShowExportDialog(true);
+  };
+
+  const handleMessage = (user) => {
+    setSelectedItem(user);
+    setShowMessageDialog(true);
+  };
+
+  const handleViewInvoice = (invoice) => {
+    setSelectedItem(invoice);
+    setShowInvoiceDialog(true);
+  };
+
+  const handleSave = (formData, type) => {
+    switch(type) {
+      case 'plan':
+        if (selectedItem?.id) {
+          setTimePlans(timePlans.map(p => p.id === selectedItem.id ? { ...p, ...formData } : p));
+        } else {
+          const newPlan = { id: Date.now(), ...formData };
+          setTimePlans([...timePlans, newPlan]);
+        }
+        break;
+      case 'router':
+        if (selectedItem?.id) {
+          setRouters(routers.map(r => r.id === selectedItem.id ? { ...r, ...formData } : r));
+        } else {
+          const newRouter = { id: Date.now(), ...formData, status: "Online", users: 0, lastSync: "Just now" };
+          setRouters([...routers, newRouter]);
+        }
+        break;
+      case 'reseller':
+        if (selectedItem?.id) {
+          setResellers(resellers.map(r => r.id === selectedItem.id ? { ...r, ...formData } : r));
+        } else {
+          const newReseller = { id: Date.now(), ...formData, status: "Active", credit: 0, permissions: [] };
+          setResellers([...resellers, newReseller]);
+        }
+        break;
+      case 'user':
+        if (selectedItem?.id) {
+          setUsers(users.map(u => u.id === selectedItem.id ? { ...u, ...formData } : u));
+        }
+        break;
+    }
+    setShowEditDialog(false);
+    setSelectedItem(null);
+    setEditingType("");
   };
 
   const markNotificationRead = (id) => {
@@ -270,21 +339,102 @@ export default function Dashboard() {
     ));
   };
 
-  const handleTerminateSession = (sessionId: number) => {
-    setActiveSessions(activeSessions.filter(session => session.id !== sessionId));
+  const markAllNotificationsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
-  const handleRouterAction = (routerId: number, action: string) => {
-    setRouters(routers.map(router => 
-      router.id === routerId 
-        ? { ...router, status: action === 'restart' ? 'Online' : action === 'maintenance' ? 'Maintenance' : router.status }
-        : router
-    ));
-  };
-
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     alert('Copied to clipboard!');
+  };
+
+  const handleSendMessage = (formData) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      alert(`SMS sent to ${selectedItem?.name} (${selectedItem?.phone}): ${formData.get('message')}`);
+      setShowMessageDialog(false);
+      setSelectedItem(null);
+    }, 1500);
+  };
+
+  const handleSMSConfigSave = (formData) => {
+    setSmsConfig({
+      provider: formData.get('provider'),
+      apiKey: formData.get('apiKey'),
+      username: formData.get('username'),
+      senderId: formData.get('senderId'),
+      enabled: true
+    });
+    setShowSMSConfigDialog(false);
+    alert('SMS configuration saved successfully!');
+  };
+
+  const handleEmailConfigSave = (formData) => {
+    setEmailConfig({
+      provider: formData.get('provider'),
+      host: formData.get('host'),
+      port: formData.get('port'),
+      username: formData.get('username'),
+      password: formData.get('password'),
+      fromEmail: formData.get('fromEmail'),
+      enabled: true
+    });
+    setShowEmailConfigDialog(false);
+    alert('Email configuration saved successfully!');
+  };
+
+  const handleBankConfigSave = (formData) => {
+    setBankConfig({
+      equity: {
+        paybill: "247247",
+        account: formData.get('equityAccount'),
+        enabled: formData.get('equityEnabled') === 'on'
+      },
+      kcb: {
+        paybill: "522522", 
+        account: formData.get('kcbAccount'),
+        enabled: formData.get('kcbEnabled') === 'on'
+      }
+    });
+    setShowBankConfigDialog(false);
+    alert('Bank configuration saved successfully!');
+  };
+
+  const downloadVoucherExport = (format) => {
+    const data = vouchers.map(v => ({
+      Code: v.code,
+      Plan: v.planName,
+      Amount: `KES ${v.amount}`,
+      Status: v.status,
+      Reseller: v.reseller,
+      Created: v.createdAt,
+      Expires: v.expiresAt
+    }));
+
+    if (format === 'csv') {
+      const csv = [
+        Object.keys(data[0]).join(','),
+        ...data.map(row => Object.values(row).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vouchers.csv';
+      a.click();
+    } else if (format === 'json') {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vouchers.json';
+      a.click();
+    }
+    
+    setShowExportDialog(false);
+    alert(`Vouchers exported as ${format.toUpperCase()}`);
   };
 
   return (
@@ -375,7 +525,14 @@ export default function Dashboard() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuLabel className="flex items-center justify-between">
+                  Notifications
+                  {unreadNotifications > 0 && (
+                    <Button variant="ghost" size="sm" onClick={markAllNotificationsRead}>
+                      Mark all read
+                    </Button>
+                  )}
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.slice(0, 5).map((notification) => (
                   <DropdownMenuItem
@@ -584,64 +741,10 @@ export default function Dashboard() {
                     <CardTitle className="text-base lg:text-lg">Time-Based Plans</CardTitle>
                     <CardDescription className="text-xs lg:text-sm">Manage hourly, daily, and monthly internet plans</CardDescription>
                   </div>
-                  <Dialog open={showAddDialog && activeTab === 'plans'} onOpenChange={setShowAddDialog}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="text-xs lg:text-sm">
-                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                        Add Plan
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md mx-auto">
-                      <DialogHeader>
-                        <DialogTitle>Create New Plan</DialogTitle>
-                        <DialogDescription>Create a time-based internet plan</DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleCreatePlan(new FormData(e.target));
-                      }} className="space-y-4">
-                        <div>
-                          <Label htmlFor="name">Plan Name</Label>
-                          <Input name="name" placeholder="e.g., 1 Hour Basic" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="duration">Duration (hours)</Label>
-                            <Input name="duration" type="number" placeholder="1" required />
-                          </div>
-                          <div>
-                            <Label htmlFor="price">Price (KES)</Label>
-                            <Input name="price" type="number" placeholder="10" required />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="speed_down">Download (Mbps)</Label>
-                            <Input name="speed_down" type="number" placeholder="5" required />
-                          </div>
-                          <div>
-                            <Label htmlFor="speed_up">Upload (Mbps)</Label>
-                            <Input name="speed_up" type="number" placeholder="2" required />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="category">Category</Label>
-                          <Select name="category" required>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="hourly">Hourly</SelectItem>
-                              <SelectItem value="daily">Daily</SelectItem>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button type="submit" className="w-full">Create Plan</Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <Button size="sm" onClick={() => { setSelectedItem(null); setEditingType('plan'); setShowEditDialog(true); }}>
+                    <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                    Add Plan
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-3 lg:gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -669,11 +772,11 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div className="flex space-x-2 mt-4">
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(plan, 'plan')}>
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
                           </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleDelete(plan.id, 'plan')}>
                             <Trash2 className="h-3 w-3 mr-1" />
                             Delete
                           </Button>
@@ -693,63 +796,10 @@ export default function Dashboard() {
                     <CardTitle className="text-base lg:text-lg">Router Management</CardTitle>
                     <CardDescription className="text-xs lg:text-sm">Manage Mikrotik and other routers</CardDescription>
                   </div>
-                  <Dialog open={showAddDialog && activeTab === 'routers'} onOpenChange={setShowAddDialog}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="text-xs lg:text-sm">
-                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                        Add Router
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md mx-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add New Router</DialogTitle>
-                        <DialogDescription>Connect a new Mikrotik or compatible router</DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleCreateRouter(new FormData(e.target));
-                      }} className="space-y-4">
-                        <div>
-                          <Label htmlFor="name">Router Name</Label>
-                          <Input name="name" placeholder="e.g., Nairobi Central" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="ip">IP Address</Label>
-                          <Input name="ip" placeholder="192.168.1.1" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="location">Location</Label>
-                          <Input name="location" placeholder="e.g., Nairobi" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="model">Router Model</Label>
-                          <Select name="model" required>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select model" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="RB4011iGS+">RB4011iGS+</SelectItem>
-                              <SelectItem value="RB3011UiAS-RM">RB3011UiAS-RM</SelectItem>
-                              <SelectItem value="RB2011UiAS-2HnD-IN">RB2011UiAS-2HnD-IN</SelectItem>
-                              <SelectItem value="CCR1009-7G-1C-1S+">CCR1009-7G-1C-1S+</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="username">Username</Label>
-                            <Input name="username" defaultValue="admin" required />
-                          </div>
-                          <div>
-                            <Label htmlFor="password">Password</Label>
-                            <Input name="password" type="password" required />
-                          </div>
-                        </div>
-                        <Button type="submit" className="w-full">Add Router</Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <Button size="sm" onClick={() => { setSelectedItem(null); setEditingType('router'); setShowEditDialog(true); }}>
+                    <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                    Add Router
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -776,13 +826,13 @@ export default function Dashboard() {
                             {router.status}
                           </Badge>
                           <div className="flex space-x-1">
-                            <Button variant="outline" size="sm" onClick={() => handleRouterAction(router.id, 'restart')}>
+                            <Button variant="outline" size="sm">
                               <RefreshCw className="h-3 w-3" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleRouterAction(router.id, 'maintenance')}>
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(router, 'router')}>
                               <Settings className="h-3 w-3" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(router, 'router')}>
                               <Edit className="h-3 w-3" />
                             </Button>
                           </div>
@@ -820,7 +870,7 @@ export default function Dashboard() {
                             <p className="font-medium text-green-600">{session.timeLeft}</p>
                             <p className="text-xs text-slate-500">Time remaining</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => handleTerminateSession(session.id)}>
+                          <Button variant="outline" size="sm">
                             <Power className="h-3 w-3 mr-1" />
                             End
                           </Button>
@@ -840,73 +890,10 @@ export default function Dashboard() {
                     <CardTitle className="text-base lg:text-lg">Reseller Management</CardTitle>
                     <CardDescription className="text-xs lg:text-sm">Manage resellers, permissions, and credit balances</CardDescription>
                   </div>
-                  <Dialog open={showAddDialog && activeTab === 'resellers'} onOpenChange={setShowAddDialog}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="text-xs lg:text-sm">
-                        <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
-                        Add Reseller
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md mx-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add New Reseller</DialogTitle>
-                        <DialogDescription>Create a new reseller account with permissions</DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleCreateReseller(new FormData(e.target));
-                      }} className="space-y-4">
-                        <div>
-                          <Label htmlFor="username">Username</Label>
-                          <Input name="username" placeholder="reseller_username" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="password">Password</Label>
-                          <Input name="password" placeholder="secure_password" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="company">Company Name</Label>
-                          <Input name="company" placeholder="Company Ltd" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="contact">Contact Person</Label>
-                          <Input name="contact" placeholder="John Doe" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input name="email" type="email" placeholder="email@company.com" required />
-                          </div>
-                          <div>
-                            <Label htmlFor="phone">Phone</Label>
-                            <Input name="phone" placeholder="+254700000000" required />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="location">Location</Label>
-                            <Input name="location" placeholder="Nairobi" required />
-                          </div>
-                          <div>
-                            <Label htmlFor="commission">Commission %</Label>
-                            <Input name="commission" type="number" placeholder="15" required />
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium mb-3 block">Permissions</Label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {permissionsList.map((permission) => (
-                              <div key={permission} className="flex items-center space-x-2">
-                                <Checkbox id={permission} name="permissions" value={permission} />
-                                <Label htmlFor={permission} className="text-sm capitalize">{permission}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <Button type="submit" className="w-full">Create Reseller</Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <Button size="sm" onClick={() => { setSelectedItem(null); setEditingType('reseller'); setShowEditDialog(true); }}>
+                    <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                    Add Reseller
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -932,7 +919,7 @@ export default function Dashboard() {
                             <Button variant="outline" size="sm">
                               <CreditCard className="h-3 w-3" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(reseller, 'reseller')}>
                               <Edit className="h-3 w-3" />
                             </Button>
                           </div>
@@ -953,7 +940,7 @@ export default function Dashboard() {
                     <CardDescription className="text-xs lg:text-sm">Generate and manage prepaid vouchers</CardDescription>
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleExportVouchers}>
                       <Download className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
                       Export
                     </Button>
@@ -1021,10 +1008,10 @@ export default function Dashboard() {
                             {user.status}
                           </Badge>
                           <div className="flex space-x-1">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(user, 'user')}>
                               <Edit className="h-3 w-3" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleMessage(user)}>
                               <MessageSquare className="h-3 w-3" />
                             </Button>
                           </div>
@@ -1064,7 +1051,7 @@ export default function Dashboard() {
                               {invoice.status}
                             </Badge>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleViewInvoice(invoice)}>
                             <Eye className="h-3 w-3" />
                           </Button>
                         </div>
@@ -1090,8 +1077,14 @@ export default function Dashboard() {
                         <Input id="portal_title" defaultValue="NetSafi Internet Portal" />
                       </div>
                       <div>
-                        <Label htmlFor="portal_logo">Logo URL</Label>
-                        <Input id="portal_logo" defaultValue="/images/logo.png" />
+                        <Label htmlFor="portal_logo">Logo Upload</Label>
+                        <div className="flex space-x-2">
+                          <Input id="portal_logo" type="file" accept="image/*" className="flex-1" />
+                          <Button variant="outline" size="sm">
+                            <Upload className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Upload PNG, JPG or SVG. Max 2MB.</p>
                       </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
@@ -1116,41 +1109,18 @@ export default function Dashboard() {
                         <p className="font-medium">Portal Preview</p>
                         <p className="text-sm text-slate-500">View how the portal looks to users</p>
                       </div>
-                      <Button variant="outline" asChild>
-                        <a href="/portal" target="_blank" rel="noopener noreferrer">
-                          <LinkIcon className="h-4 w-4 mr-2" />
-                          Open Portal
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base lg:text-lg">Portal Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Auto-logout inactive users</p>
-                        <p className="text-sm text-slate-500">Automatically logout users after 5 minutes of inactivity</p>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" asChild>
+                          <a href="/portal" target="_blank" rel="noopener noreferrer">
+                            <LinkIcon className="h-4 w-4 mr-2" />
+                            Open Portal
+                          </a>
+                        </Button>
+                        <Button>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Changes
+                        </Button>
                       </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Show data usage</p>
-                        <p className="text-sm text-slate-500">Display real-time data usage to users</p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Enable voucher redemption</p>
-                        <p className="text-sm text-slate-500">Allow users to redeem vouchers directly</p>
-                      </div>
-                      <Switch defaultChecked />
                     </div>
                   </CardContent>
                 </Card>
@@ -1160,6 +1130,87 @@ export default function Dashboard() {
             {/* Settings Tab */}
             <TabsContent value="settings">
               <div className="grid gap-4 lg:gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">Communication Settings</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Configure SMS and Email services</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium">SMS Configuration</p>
+                          <p className="text-sm text-slate-500">Configure SMS gateway for notifications</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowSMSConfigDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Mail className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">Email Configuration</p>
+                          <p className="text-sm text-slate-500">Configure SMTP for email notifications</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowEmailConfigDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">Payment Gateway Configuration</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Configure mobile money and bank payments</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      { name: 'M-Pesa Daraja API', status: true, icon: '📱' },
+                      { name: 'Airtel Money', status: true, icon: '📲' },
+                      { name: 'T-Kash', status: false, icon: '💳' },
+                      { name: 'PayPal', status: false, icon: '💰' }
+                    ].map((gateway) => (
+                      <div key={gateway.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{gateway.icon}</span>
+                          <div>
+                            <p className="font-medium">{gateway.name}</p>
+                            <p className="text-sm text-slate-500">Payment gateway integration</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch checked={gateway.status} />
+                          <Button variant="outline" size="sm">
+                            <Settings className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Banknote className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium">Bank Paybill Configuration</p>
+                          <p className="text-sm text-slate-500">Configure Equity and KCB bank paybills</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowBankConfigDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base lg:text-lg">System Configuration</CardTitle>
@@ -1220,36 +1271,6 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base lg:text-lg">Payment Gateway Configuration</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {[
-                      { name: 'M-Pesa Daraja API', status: true, icon: '📱' },
-                      { name: 'Airtel Money', status: true, icon: '📲' },
-                      { name: 'T-Kash', status: false, icon: '💳' },
-                      { name: 'PayPal', status: false, icon: '💰' }
-                    ].map((gateway) => (
-                      <div key={gateway.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{gateway.icon}</span>
-                          <div>
-                            <p className="font-medium">{gateway.name}</p>
-                            <p className="text-sm text-slate-500">Payment gateway integration</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch checked={gateway.status} />
-                          <Button variant="outline" size="sm">
-                            <Settings className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
               </div>
             </TabsContent>
           </Tabs>
@@ -1270,6 +1291,501 @@ export default function Dashboard() {
         </footer>
       </div>
 
+      {/* Edit Dialog - Universal */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedItem ? `Edit ${editingType.charAt(0).toUpperCase() + editingType.slice(1)}` : `Add New ${editingType.charAt(0).toUpperCase() + editingType.slice(1)}`}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedItem ? `Update ${editingType} information` : `Create a new ${editingType}`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingType === 'plan' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const data = {
+                name: formData.get('name'),
+                duration: parseInt(formData.get('duration')),
+                price: parseInt(formData.get('price')),
+                speed_down: parseInt(formData.get('speed_down')),
+                speed_up: parseInt(formData.get('speed_up')),
+                category: formData.get('category'),
+                active: true
+              };
+              handleSave(data, 'plan');
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Plan Name</Label>
+                <Input name="name" defaultValue={selectedItem?.name} placeholder="e.g., 1 Hour Basic" required />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="duration">Duration (hours)</Label>
+                  <Input name="duration" type="number" defaultValue={selectedItem?.duration} placeholder="1" required />
+                </div>
+                <div>
+                  <Label htmlFor="price">Price (KES)</Label>
+                  <Input name="price" type="number" defaultValue={selectedItem?.price} placeholder="10" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="speed_down">Download (Mbps)</Label>
+                  <Input name="speed_down" type="number" defaultValue={selectedItem?.speed_down} placeholder="5" required />
+                </div>
+                <div>
+                  <Label htmlFor="speed_up">Upload (Mbps)</Label>
+                  <Input name="speed_up" type="number" defaultValue={selectedItem?.speed_up} placeholder="2" required />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" defaultValue={selectedItem?.category} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full">
+                {selectedItem ? 'Update Plan' : 'Create Plan'}
+              </Button>
+            </form>
+          )}
+
+          {editingType === 'router' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const data = {
+                name: formData.get('name'),
+                ip: formData.get('ip'),
+                location: formData.get('location'),
+                model: formData.get('model'),
+                username: formData.get('username'),
+                password: formData.get('password')
+              };
+              handleSave(data, 'router');
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Router Name</Label>
+                <Input name="name" defaultValue={selectedItem?.name} placeholder="e.g., Nairobi Central" required />
+              </div>
+              <div>
+                <Label htmlFor="ip">IP Address</Label>
+                <Input name="ip" defaultValue={selectedItem?.ip} placeholder="192.168.1.1" required />
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input name="location" defaultValue={selectedItem?.location} placeholder="e.g., Nairobi" required />
+              </div>
+              <div>
+                <Label htmlFor="model">Router Model</Label>
+                <Select name="model" defaultValue={selectedItem?.model} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="RB4011iGS+">RB4011iGS+</SelectItem>
+                    <SelectItem value="RB3011UiAS-RM">RB3011UiAS-RM</SelectItem>
+                    <SelectItem value="RB2011UiAS-2HnD-IN">RB2011UiAS-2HnD-IN</SelectItem>
+                    <SelectItem value="CCR1009-7G-1C-1S+">CCR1009-7G-1C-1S+</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input name="username" defaultValue={selectedItem?.username || "admin"} required />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input name="password" type="password" defaultValue={selectedItem?.password} required />
+                </div>
+              </div>
+              <Button type="submit" className="w-full">
+                {selectedItem ? 'Update Router' : 'Add Router'}
+              </Button>
+            </form>
+          )}
+
+          {editingType === 'reseller' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const data = {
+                username: formData.get('username'),
+                password: formData.get('password'),
+                company: formData.get('company'),
+                contact: formData.get('contact'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                location: formData.get('location'),
+                commission: parseFloat(formData.get('commission'))
+              };
+              handleSave(data, 'reseller');
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input name="username" defaultValue={selectedItem?.username} placeholder="reseller_username" required />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input name="password" defaultValue={selectedItem?.password} placeholder="secure_password" required />
+              </div>
+              <div>
+                <Label htmlFor="company">Company Name</Label>
+                <Input name="company" defaultValue={selectedItem?.company} placeholder="Company Ltd" required />
+              </div>
+              <div>
+                <Label htmlFor="contact">Contact Person</Label>
+                <Input name="contact" defaultValue={selectedItem?.contact} placeholder="John Doe" required />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input name="email" type="email" defaultValue={selectedItem?.email} placeholder="email@company.com" required />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input name="phone" defaultValue={selectedItem?.phone} placeholder="+254700000000" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input name="location" defaultValue={selectedItem?.location} placeholder="Nairobi" required />
+                </div>
+                <div>
+                  <Label htmlFor="commission">Commission %</Label>
+                  <Input name="commission" type="number" defaultValue={selectedItem?.commission} placeholder="15" required />
+                </div>
+              </div>
+              <Button type="submit" className="w-full">
+                {selectedItem ? 'Update Reseller' : 'Create Reseller'}
+              </Button>
+            </form>
+          )}
+
+          {editingType === 'user' && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const data = {
+                name: formData.get('name'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                location: formData.get('location'),
+                plan: formData.get('plan'),
+                amount: parseInt(formData.get('amount'))
+              };
+              handleSave(data, 'user');
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input name="name" defaultValue={selectedItem?.name} placeholder="John Doe" required />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input name="phone" defaultValue={selectedItem?.phone} placeholder="+254712345678" required />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input name="email" type="email" defaultValue={selectedItem?.email} placeholder="john@example.com" />
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input name="location" defaultValue={selectedItem?.location} placeholder="Nairobi" required />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="plan">Plan</Label>
+                  <Select name="plan" defaultValue={selectedItem?.plan} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select plan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Basic">Basic</SelectItem>
+                      <SelectItem value="Standard">Standard</SelectItem>
+                      <SelectItem value="Premium">Premium</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="amount">Monthly Amount</Label>
+                  <Input name="amount" type="number" defaultValue={selectedItem?.amount} placeholder="2500" required />
+                </div>
+              </div>
+              <Button type="submit" className="w-full">Update User</Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Message Dialog */}
+      <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Send SMS Message</DialogTitle>
+            <DialogDescription>
+              Send SMS to {selectedItem?.name} ({selectedItem?.phone})
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage(new FormData(e.target));
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea name="message" placeholder="Type your message here..." required rows={4} />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Sending...</span>
+                </div>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Message
+                </>
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invoice View Dialog */}
+      <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Invoice Details</DialogTitle>
+            <DialogDescription>Invoice {selectedItem?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-slate-600">Customer:</span>
+                  <p className="font-medium">{selectedItem.customer}</p>
+                </div>
+                <div>
+                  <span className="text-slate-600">Phone:</span>
+                  <p className="font-medium">{selectedItem.phone}</p>
+                </div>
+                <div>
+                  <span className="text-slate-600">Amount:</span>
+                  <p className="font-medium text-green-600">KES {selectedItem.amount?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <span className="text-slate-600">Status:</span>
+                  <Badge variant={selectedItem.status === 'Paid' ? 'default' : selectedItem.status === 'Pending' ? 'secondary' : 'destructive'}>
+                    {selectedItem.status}
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-slate-600">Date:</span>
+                  <p className="font-medium">{selectedItem.date}</p>
+                </div>
+                <div>
+                  <span className="text-slate-600">Due Date:</span>
+                  <p className="font-medium">{selectedItem.dueDate}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-slate-600">Payment Method:</span>
+                  <p className="font-medium">{selectedItem.paymentMethod}</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" className="flex-1">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </Button>
+                <Button className="flex-1">
+                  <Send className="h-4 w-4 mr-2" />
+                  Send to Customer
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle>Export Vouchers</DialogTitle>
+            <DialogDescription>Choose export format</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button className="w-full" onClick={() => downloadVoucherExport('csv')}>
+              <Download className="h-4 w-4 mr-2" />
+              Export as CSV
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => downloadVoucherExport('json')}>
+              <Download className="h-4 w-4 mr-2" />
+              Export as JSON
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* SMS Configuration Dialog */}
+      <Dialog open={showSMSConfigDialog} onOpenChange={setShowSMSConfigDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>SMS Configuration</DialogTitle>
+            <DialogDescription>Configure SMS gateway settings</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleSMSConfigSave(new FormData(e.target));
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="provider">SMS Provider</Label>
+              <Select name="provider" defaultValue={smsConfig.provider} required>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="africastalking">Africa's Talking</SelectItem>
+                  <SelectItem value="twilio">Twilio</SelectItem>
+                  <SelectItem value="nexmo">Nexmo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="apiKey">API Key</Label>
+              <Input name="apiKey" defaultValue={smsConfig.apiKey} placeholder="Your API key" required />
+            </div>
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input name="username" defaultValue={smsConfig.username} placeholder="API username" required />
+            </div>
+            <div>
+              <Label htmlFor="senderId">Sender ID</Label>
+              <Input name="senderId" defaultValue={smsConfig.senderId} placeholder="NetSafi" required />
+            </div>
+            <Button type="submit" className="w-full">Save SMS Configuration</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Configuration Dialog */}
+      <Dialog open={showEmailConfigDialog} onOpenChange={setShowEmailConfigDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Email Configuration</DialogTitle>
+            <DialogDescription>Configure SMTP email settings</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleEmailConfigSave(new FormData(e.target));
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="provider">Email Provider</Label>
+              <Select name="provider" defaultValue={emailConfig.provider} required>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="smtp">SMTP</SelectItem>
+                  <SelectItem value="gmail">Gmail</SelectItem>
+                  <SelectItem value="outlook">Outlook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="host">SMTP Host</Label>
+                <Input name="host" defaultValue={emailConfig.host} placeholder="smtp.gmail.com" required />
+              </div>
+              <div>
+                <Label htmlFor="port">Port</Label>
+                <Input name="port" defaultValue={emailConfig.port} placeholder="587" required />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="username">Email Username</Label>
+              <Input name="username" defaultValue={emailConfig.username} placeholder="your@email.com" required />
+            </div>
+            <div>
+              <Label htmlFor="password">Email Password</Label>
+              <Input name="password" type="password" defaultValue={emailConfig.password} placeholder="App password" required />
+            </div>
+            <div>
+              <Label htmlFor="fromEmail">From Email</Label>
+              <Input name="fromEmail" defaultValue={emailConfig.fromEmail} placeholder="noreply@netsafi.com" required />
+            </div>
+            <Button type="submit" className="w-full">Save Email Configuration</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bank Configuration Dialog */}
+      <Dialog open={showBankConfigDialog} onOpenChange={setShowBankConfigDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Bank Paybill Configuration</DialogTitle>
+            <DialogDescription>Configure Equity and KCB bank paybills</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleBankConfigSave(new FormData(e.target));
+          }} className="space-y-6">
+            <div className="space-y-4">
+              <h4 className="font-medium">Equity Bank</h4>
+              <div className="flex items-center space-x-2">
+                <Checkbox name="equityEnabled" defaultChecked={bankConfig.equity.enabled} />
+                <Label>Enable Equity Bank Paybill</Label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Paybill Number</Label>
+                  <Input value="247247" disabled />
+                </div>
+                <div>
+                  <Label htmlFor="equityAccount">Account Number</Label>
+                  <Input name="equityAccount" defaultValue={bankConfig.equity.account} placeholder="Your account" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium">KCB Bank</h4>
+              <div className="flex items-center space-x-2">
+                <Checkbox name="kcbEnabled" defaultChecked={bankConfig.kcb.enabled} />
+                <Label>Enable KCB Bank Paybill</Label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Paybill Number</Label>
+                  <Input value="522522" disabled />
+                </div>
+                <div>
+                  <Label htmlFor="kcbAccount">Account Number</Label>
+                  <Input name="kcbAccount" defaultValue={bankConfig.kcb.account} placeholder="Your account" />
+                </div>
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full">Save Bank Configuration</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Profile Settings Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
         <DialogContent className="max-w-md mx-auto">
@@ -1277,7 +1793,11 @@ export default function Dashboard() {
             <DialogTitle>Profile Settings</DialogTitle>
             <DialogDescription>Update your account information</DialogDescription>
           </DialogHeader>
-          <form className="space-y-4">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            alert('Profile updated successfully!');
+            setShowProfileDialog(false);
+          }} className="space-y-4">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input name="fullName" defaultValue="Administrator" />
