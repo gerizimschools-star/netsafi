@@ -306,6 +306,57 @@ export default function Dashboard() {
     setShowInvoiceDialog(true);
   };
 
+  const handleDownloadInvoice = (invoice) => {
+    // Generate PDF content
+    const pdfContent = `Invoice ${invoice.id}\n\nCustomer: ${invoice.customer}\nAmount: KES ${invoice.amount}\nStatus: ${invoice.status}\nDate: ${invoice.date}\nDue Date: ${invoice.dueDate}\nPayment Method: ${invoice.paymentMethod}`;
+
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${invoice.id}.txt`;
+    a.click();
+    alert('Invoice downloaded successfully!');
+  };
+
+  const handleSendInvoiceToCustomer = (invoice) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      alert(`Invoice ${invoice.id} sent to ${invoice.customer} at ${invoice.phone}`);
+      setShowInvoiceDialog(false);
+    }, 1500);
+  };
+
+  const handlePaymentConfigSave = (formData) => {
+    const gateway = selectedPaymentGateway;
+    setPaymentConfig(prev => ({
+      ...prev,
+      [gateway]: {
+        ...prev[gateway],
+        enabled: formData.get('enabled') === 'on',
+        ...(gateway === 'mpesa' && {
+          businessShortCode: formData.get('businessShortCode'),
+          passkey: formData.get('passkey'),
+          consumerKey: formData.get('consumerKey'),
+          consumerSecret: formData.get('consumerSecret')
+        }),
+        ...(gateway === 'airtelMoney' && {
+          clientId: formData.get('clientId'),
+          clientSecret: formData.get('clientSecret'),
+          merchantId: formData.get('merchantId')
+        })
+      }
+    }));
+    setShowPaymentConfigDialog(false);
+    alert(`${gateway} configuration saved successfully!`);
+  };
+
+  const handlePaymentGatewayConfig = (gateway) => {
+    setSelectedPaymentGateway(gateway);
+    setShowPaymentConfigDialog(true);
+  };
+
   const handleSave = (formData, type) => {
     switch(type) {
       case 'plan':
