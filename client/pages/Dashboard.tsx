@@ -1788,7 +1788,7 @@ export default function Dashboard() {
 
       {/* Email Configuration Dialog */}
       <Dialog open={showEmailConfigDialog} onOpenChange={setShowEmailConfigDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto m-4">
           <DialogHeader>
             <DialogTitle>Email Configuration</DialogTitle>
             <DialogDescription>Configure SMTP email settings</DialogDescription>
