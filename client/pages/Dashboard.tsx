@@ -1928,7 +1928,7 @@ export default function Dashboard() {
 
       {/* Reseller Credentials Dialog */}
       <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
-        <DialogContent className="max-w-lg mx-auto">
+        <DialogContent className="max-w-lg mx-auto m-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Reseller Login Credentials</DialogTitle>
             <DialogDescription>Use these credentials to access the reseller portal at /reseller</DialogDescription>
