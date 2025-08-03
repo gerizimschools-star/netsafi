@@ -1891,7 +1891,7 @@ export default function Dashboard() {
 
       {/* Profile Settings Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="max-w-md mx-auto">
+        <DialogContent className="max-w-md mx-auto m-4">
           <DialogHeader>
             <DialogTitle>Profile Settings</DialogTitle>
             <DialogDescription>Update your account information</DialogDescription>
