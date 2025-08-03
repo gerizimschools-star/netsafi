@@ -187,12 +187,52 @@ INSERT INTO resellers (username, password_hash, company_name, contact_person, em
 ('reseller_mombasa', '$2b$10$encrypted_password_hash', 'Coast Internet Services', 'Fatma Said', 'fatma@coastnet.com', '+254702345678', 'Mombasa', 12.00, 30000, ARRAY['users', 'vouchers']),
 ('reseller_kisumu', '$2b$10$encrypted_password_hash', 'Lake Connect Ltd', 'Peter Odhiambo', 'peter@lakeconnect.com', '+254703456789', 'Kisumu', 10.00, 25000, ARRAY['users', 'invoices']);
 
+-- System configuration table for payment settings and other configurations
+CREATE TABLE system_configurations (
+    id SERIAL PRIMARY KEY,
+    config_key VARCHAR(100) NOT NULL UNIQUE,
+    config_value TEXT NOT NULL,
+    config_type VARCHAR(50) DEFAULT 'text',
+    category VARCHAR(50) DEFAULT 'general',
+    description TEXT,
+    is_encrypted BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert sample payment gateways
 INSERT INTO payment_gateways (name, type, is_active, configuration, test_mode) VALUES
-('M-Pesa Daraja', 'mpesa', true, '{"consumer_key": "your_key", "consumer_secret": "your_secret", "shortcode": "174379"}', true),
-('Airtel Money', 'airtel', true, '{"client_id": "your_client_id", "client_secret": "your_secret"}', true),
-('PayPal', 'paypal', false, '{"client_id": "your_paypal_client_id", "client_secret": "your_secret"}', true),
-('Stripe', 'stripe', false, '{"publishable_key": "pk_test_...", "secret_key": "sk_test_..."}', true);
+('M-Pesa Daraja', 'mpesa', true, '{"consumer_key": "", "consumer_secret": "", "business_short_code": "174379", "passkey": "", "endpoint": "https://sandbox.safaricom.co.ke"}', true),
+('Airtel Money', 'airtelMoney', true, '{"client_id": "", "client_secret": "", "merchant_id": "", "endpoint": "https://openapi.airtel.africa"}', true),
+('T-Kash', 'tkash', false, '{"api_key": "", "merchant_code": "", "endpoint": "https://api.tkash.co.ke"}', true),
+('PayPal', 'paypal', false, '{"client_id": "", "client_secret": "", "mode": "sandbox"}', true);
+
+-- Insert payment and system configurations
+INSERT INTO system_configurations (config_key, config_value, config_type, category, description) VALUES
+('mpesa_enabled', 'true', 'boolean', 'payment', 'Enable M-Pesa payments'),
+('mpesa_business_short_code', '174379', 'text', 'payment', 'M-Pesa business short code'),
+('mpesa_consumer_key', '', 'text', 'payment', 'M-Pesa consumer key'),
+('mpesa_consumer_secret', '', 'text', 'payment', 'M-Pesa consumer secret'),
+('mpesa_passkey', '', 'text', 'payment', 'M-Pesa passkey'),
+('airtel_money_enabled', 'true', 'boolean', 'payment', 'Enable Airtel Money payments'),
+('airtel_money_client_id', '', 'text', 'payment', 'Airtel Money client ID'),
+('airtel_money_client_secret', '', 'text', 'payment', 'Airtel Money client secret'),
+('airtel_money_merchant_id', '', 'text', 'payment', 'Airtel Money merchant ID'),
+('bank_paybill_enabled', 'false', 'boolean', 'payment', 'Enable bank paybill payments'),
+('equity_paybill_number', '247247', 'text', 'payment', 'Equity Bank paybill number'),
+('equity_account_number', '', 'text', 'payment', 'Equity Bank account number'),
+('kcb_paybill_number', '522522', 'text', 'payment', 'KCB Bank paybill number'),
+('kcb_account_number', '', 'text', 'payment', 'KCB Bank account number'),
+('sms_provider', 'africastalking', 'text', 'communication', 'SMS service provider'),
+('sms_api_key', '', 'text', 'communication', 'SMS API key'),
+('sms_username', '', 'text', 'communication', 'SMS API username'),
+('sms_sender_id', 'NetSafi', 'text', 'communication', 'SMS sender ID'),
+('email_provider', 'smtp', 'text', 'communication', 'Email service provider'),
+('email_host', 'smtp.gmail.com', 'text', 'communication', 'SMTP host'),
+('email_port', '587', 'text', 'communication', 'SMTP port'),
+('email_username', '', 'text', 'communication', 'Email username'),
+('email_password', '', 'text', 'communication', 'Email password'),
+('email_from_address', 'noreply@netsafi.com', 'text', 'communication', 'From email address');
 
 -- Insert portal customization settings
 INSERT INTO portal_settings (setting_key, setting_value, setting_type, category, description) VALUES
