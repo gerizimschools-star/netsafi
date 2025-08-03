@@ -232,6 +232,16 @@ export default function Dashboard() {
     kcb: { paybill: "522522", account: "", enabled: false }
   });
 
+  const [paymentConfig, setPaymentConfig] = useState({
+    mpesa: { enabled: true, businessShortCode: "174379", passkey: "", consumerKey: "", consumerSecret: "" },
+    airtelMoney: { enabled: true, clientId: "", clientSecret: "", merchantId: "" },
+    tkash: { enabled: false, apiKey: "", merchantCode: "" },
+    paypal: { enabled: false, clientId: "", clientSecret: "" }
+  });
+
+  const [showPaymentConfigDialog, setShowPaymentConfigDialog] = useState(false);
+  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
+
   const permissionsList = ["users", "invoices", "vouchers", "plans", "routers", "reports", "settings"];
 
   const navItems = [
