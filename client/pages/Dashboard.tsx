@@ -239,8 +239,93 @@ export default function Dashboard() {
     paypal: { enabled: false, clientId: "", clientSecret: "" }
   });
 
+  const [adminPreferences, setAdminPreferences] = useState({
+    language: "en",
+    timezone: "EAT",
+    currency: "KES",
+    dateFormat: "dd/MM/yyyy",
+    timeFormat: "24h",
+    theme: "light",
+    dashboardLayout: "default",
+    autoRefresh: true,
+    refreshInterval: 30,
+    companyName: "NetSafi ISP",
+    contactEmail: "admin@netsafi.com",
+    supportPhone: "+254700000000",
+    maxSessionDuration: 24,
+    defaultUserPlan: "Basic",
+    enableDebugMode: false
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: {
+      enabled: true,
+      newUser: true,
+      lowCredit: true,
+      systemAlerts: true,
+      routerOffline: true,
+      dailyReports: false,
+      weeklyReports: true,
+      monthlyReports: true
+    },
+    smsNotifications: {
+      enabled: true,
+      criticalAlerts: true,
+      routerDown: true,
+      lowCredit: false,
+      newReseller: true
+    },
+    pushNotifications: {
+      enabled: true,
+      browserNotifications: true,
+      soundEnabled: true,
+      vibrationEnabled: false
+    },
+    alertThresholds: {
+      lowCreditAmount: 5000,
+      highUsageMB: 1000,
+      routerOfflineMinutes: 5,
+      sessionTimeoutMinutes: 60
+    }
+  });
+
+  const [systemSettings, setSystemSettings] = useState({
+    maintenanceMode: false,
+    allowRegistration: true,
+    requireEmailVerification: true,
+    enableTwoFactorAuth: false,
+    sessionTimeout: 30,
+    maxLoginAttempts: 5,
+    passwordMinLength: 8,
+    requireStrongPassword: true,
+    enableApiAccess: true,
+    apiRateLimit: 1000,
+    enableAuditLog: true,
+    backupFrequency: "daily",
+    enableDarkMode: false,
+    enableMobileApp: true
+  });
+
+  const [securitySettings, setSecuritySettings] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    enableTwoFactor: false,
+    trustedDevices: [],
+    lastPasswordChange: "2024-01-01",
+    loginHistory: [
+      { date: "2024-01-18 10:30", ip: "192.168.1.100", location: "Nairobi", device: "Chrome/Windows" },
+      { date: "2024-01-17 14:15", ip: "192.168.1.100", location: "Nairobi", device: "Chrome/Windows" },
+      { date: "2024-01-16 09:45", ip: "192.168.1.105", location: "Nairobi", device: "Firefox/Windows" }
+    ]
+  });
+
   const [showPaymentConfigDialog, setShowPaymentConfigDialog] = useState(false);
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+  const [showNotificationSettingsDialog, setShowNotificationSettingsDialog] = useState(false);
+  const [showSystemSettingsDialog, setShowSystemSettingsDialog] = useState(false);
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
 
   const permissionsList = ["users", "invoices", "vouchers", "plans", "routers", "reports", "settings"];
 
@@ -355,6 +440,110 @@ export default function Dashboard() {
   const handlePaymentGatewayConfig = (gateway) => {
     setSelectedPaymentGateway(gateway);
     setShowPaymentConfigDialog(true);
+  };
+
+  const handlePreferencesSave = (formData) => {
+    setAdminPreferences({
+      language: formData.get('language'),
+      timezone: formData.get('timezone'),
+      currency: formData.get('currency'),
+      dateFormat: formData.get('dateFormat'),
+      timeFormat: formData.get('timeFormat'),
+      theme: formData.get('theme'),
+      dashboardLayout: formData.get('dashboardLayout'),
+      autoRefresh: formData.get('autoRefresh') === 'on',
+      refreshInterval: parseInt(formData.get('refreshInterval')),
+      companyName: formData.get('companyName'),
+      contactEmail: formData.get('contactEmail'),
+      supportPhone: formData.get('supportPhone'),
+      maxSessionDuration: parseInt(formData.get('maxSessionDuration')),
+      defaultUserPlan: formData.get('defaultUserPlan'),
+      enableDebugMode: formData.get('enableDebugMode') === 'on'
+    });
+    setShowPreferencesDialog(false);
+    alert('Administrator preferences saved successfully!');
+  };
+
+  const handleNotificationSettingsSave = (formData) => {
+    setNotificationSettings({
+      emailNotifications: {
+        enabled: formData.get('emailEnabled') === 'on',
+        newUser: formData.get('emailNewUser') === 'on',
+        lowCredit: formData.get('emailLowCredit') === 'on',
+        systemAlerts: formData.get('emailSystemAlerts') === 'on',
+        routerOffline: formData.get('emailRouterOffline') === 'on',
+        dailyReports: formData.get('emailDailyReports') === 'on',
+        weeklyReports: formData.get('emailWeeklyReports') === 'on',
+        monthlyReports: formData.get('emailMonthlyReports') === 'on'
+      },
+      smsNotifications: {
+        enabled: formData.get('smsEnabled') === 'on',
+        criticalAlerts: formData.get('smsCriticalAlerts') === 'on',
+        routerDown: formData.get('smsRouterDown') === 'on',
+        lowCredit: formData.get('smsLowCredit') === 'on',
+        newReseller: formData.get('smsNewReseller') === 'on'
+      },
+      pushNotifications: {
+        enabled: formData.get('pushEnabled') === 'on',
+        browserNotifications: formData.get('pushBrowser') === 'on',
+        soundEnabled: formData.get('pushSound') === 'on',
+        vibrationEnabled: formData.get('pushVibration') === 'on'
+      },
+      alertThresholds: {
+        lowCreditAmount: parseInt(formData.get('lowCreditAmount')),
+        highUsageMB: parseInt(formData.get('highUsageMB')),
+        routerOfflineMinutes: parseInt(formData.get('routerOfflineMinutes')),
+        sessionTimeoutMinutes: parseInt(formData.get('sessionTimeoutMinutes'))
+      }
+    });
+    setShowNotificationSettingsDialog(false);
+    alert('Notification settings saved successfully!');
+  };
+
+  const handleSystemSettingsSave = (formData) => {
+    setSystemSettings({
+      maintenanceMode: formData.get('maintenanceMode') === 'on',
+      allowRegistration: formData.get('allowRegistration') === 'on',
+      requireEmailVerification: formData.get('requireEmailVerification') === 'on',
+      enableTwoFactorAuth: formData.get('enableTwoFactorAuth') === 'on',
+      sessionTimeout: parseInt(formData.get('sessionTimeout')),
+      maxLoginAttempts: parseInt(formData.get('maxLoginAttempts')),
+      passwordMinLength: parseInt(formData.get('passwordMinLength')),
+      requireStrongPassword: formData.get('requireStrongPassword') === 'on',
+      enableApiAccess: formData.get('enableApiAccess') === 'on',
+      apiRateLimit: parseInt(formData.get('apiRateLimit')),
+      enableAuditLog: formData.get('enableAuditLog') === 'on',
+      backupFrequency: formData.get('backupFrequency'),
+      enableDarkMode: formData.get('enableDarkMode') === 'on',
+      enableMobileApp: formData.get('enableMobileApp') === 'on'
+    });
+    setShowSystemSettingsDialog(false);
+    alert('System settings saved successfully!');
+  };
+
+  const handleSecuritySettingsSave = (formData) => {
+    const currentPassword = formData.get('currentPassword');
+    const newPassword = formData.get('newPassword');
+    const confirmPassword = formData.get('confirmPassword');
+
+    if (newPassword && newPassword !== confirmPassword) {
+      alert('New passwords do not match!');
+      return;
+    }
+
+    if (newPassword && newPassword.length < 8) {
+      alert('Password must be at least 8 characters long!');
+      return;
+    }
+
+    setSecuritySettings(prev => ({
+      ...prev,
+      enableTwoFactor: formData.get('enableTwoFactor') === 'on',
+      lastPasswordChange: newPassword ? new Date().toISOString().split('T')[0] : prev.lastPasswordChange
+    }));
+
+    setShowSecurityDialog(false);
+    alert('Security settings updated successfully!');
   };
 
   const handleSave = (formData, type) => {
@@ -638,7 +827,7 @@ export default function Dashboard() {
                   <Key className="mr-2 h-4 w-4" />
                   Reseller Credentials
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowPreferencesDialog(true)}>
                   <Settings className="mr-2 h-4 w-4" />
                   Preferences
                 </DropdownMenuItem>
@@ -1353,6 +1542,70 @@ export default function Dashboard() {
                         </div>
                         <Switch />
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base lg:text-lg">Administrator Settings</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Advanced system and preference settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <User className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">Administrator Preferences</p>
+                          <p className="text-sm text-slate-500">Configure personal settings and preferences</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowPreferencesDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Bell className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium">Notification Settings</p>
+                          <p className="text-sm text-slate-500">Configure alerts and notifications</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowNotificationSettingsDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Shield className="h-5 w-5 text-red-600" />
+                        <div>
+                          <p className="font-medium">Security Settings</p>
+                          <p className="text-sm text-slate-500">Manage passwords and security options</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowSecurityDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Database className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium">System Settings</p>
+                          <p className="text-sm text-slate-500">Configure system-wide settings</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setShowSystemSettingsDialog(true)}>
+                        <Settings className="h-3 w-3 mr-1" />
+                        Configure
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
