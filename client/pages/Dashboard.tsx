@@ -2236,39 +2236,352 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Profile Settings Dialog */}
+      {/* Enhanced Profile Settings Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="max-w-md mx-auto m-4">
+        <DialogContent className="max-w-4xl mx-auto m-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
-            <DialogDescription>Update your account information</DialogDescription>
+            <DialogTitle className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Administrator Profile</h2>
+                <p className="text-sm text-gray-500">Manage your account information and preferences</p>
+              </div>
+            </DialogTitle>
           </DialogHeader>
+
           <form onSubmit={(e) => {
             e.preventDefault();
-            alert('Profile updated successfully!');
-            setShowProfileDialog(false);
-          }} className="space-y-4">
-            <div>
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input name="fullName" defaultValue="Administrator" />
+            handleProfileUpdate(new FormData(e.target));
+          }} className="space-y-8">
+
+            {/* Profile Picture Section */}
+            <div className="flex items-center space-x-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  {adminProfile.firstName.charAt(0)}{adminProfile.lastName.charAt(0)}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0"
+                  onClick={() => alert('Profile picture upload functionality would be implemented here')}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {adminProfile.firstName} {adminProfile.lastName}
+                </h3>
+                <p className="text-sm text-gray-600">{adminProfile.jobTitle}</p>
+                <p className="text-sm text-gray-500">{adminProfile.department}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Badge variant="outline">{adminProfile.accountStatus}</Badge>
+                  <Badge variant={adminProfile.twoFactorEnabled ? "default" : "secondary"}>
+                    {adminProfile.twoFactorEnabled ? "2FA Enabled" : "2FA Disabled"}
+                  </Badge>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input name="email" type="email" defaultValue="admin@netsafi.com" />
+
+            {/* Personal Information */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <User className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Personal Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    name="firstName"
+                    defaultValue={adminProfile.firstName}
+                    required
+                    placeholder="Enter first name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    name="lastName"
+                    defaultValue={adminProfile.lastName}
+                    required
+                    placeholder="Enter last name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    name="username"
+                    defaultValue={adminProfile.username}
+                    placeholder="Enter username"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="employeeId">Employee ID</Label>
+                  <Input
+                    name="employeeId"
+                    defaultValue={adminProfile.employeeId}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Input
+                    name="jobTitle"
+                    defaultValue={adminProfile.jobTitle}
+                    placeholder="Enter job title"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="department">Department</Label>
+                  <Select name="department" defaultValue={adminProfile.department}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="IT Management">IT Management</SelectItem>
+                      <SelectItem value="Network Operations">Network Operations</SelectItem>
+                      <SelectItem value="Customer Support">Customer Support</SelectItem>
+                      <SelectItem value="Finance">Finance</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                      <SelectItem value="Human Resources">Human Resources</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="bio">Bio / Description</Label>
+                <Textarea
+                  name="bio"
+                  defaultValue={adminProfile.bio}
+                  placeholder="Tell us about yourself..."
+                  rows={3}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input name="phone" defaultValue="+254700000000" />
+
+            <Separator />
+
+            {/* Contact Information */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <Phone className="h-5 w-5 text-green-600" />
+                <h3 className="text-lg font-semibold">Contact Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    name="email"
+                    type="email"
+                    defaultValue={adminProfile.email}
+                    required
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Primary Phone *</Label>
+                  <Input
+                    name="phone"
+                    defaultValue={adminProfile.phone}
+                    required
+                    placeholder="+254700000000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="alternatePhone">Alternate Phone</Label>
+                  <Input
+                    name="alternatePhone"
+                    defaultValue={adminProfile.alternatePhone}
+                    placeholder="+254700000000"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input name="currentPassword" type="password" />
+
+            <Separator />
+
+            {/* Address Information */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5 text-red-600" />
+                <h3 className="text-lg font-semibold">Address Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <Label htmlFor="street">Street Address</Label>
+                  <Input
+                    name="street"
+                    defaultValue={adminProfile.address.street}
+                    placeholder="Enter street address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    name="city"
+                    defaultValue={adminProfile.address.city}
+                    placeholder="Enter city"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State/County</Label>
+                  <Input
+                    name="state"
+                    defaultValue={adminProfile.address.state}
+                    placeholder="Enter state or county"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                  <Input
+                    name="zipCode"
+                    defaultValue={adminProfile.address.zipCode}
+                    placeholder="Enter ZIP code"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="country">Country</Label>
+                  <Select name="country" defaultValue={adminProfile.address.country}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Kenya">Kenya</SelectItem>
+                      <SelectItem value="Uganda">Uganda</SelectItem>
+                      <SelectItem value="Tanzania">Tanzania</SelectItem>
+                      <SelectItem value="Rwanda">Rwanda</SelectItem>
+                      <SelectItem value="Ethiopia">Ethiopia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input name="newPassword" type="password" />
+
+            <Separator />
+
+            {/* Emergency Contact */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <h3 className="text-lg font-semibold">Emergency Contact</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <Label htmlFor="emergencyName">Contact Name</Label>
+                  <Input
+                    name="emergencyName"
+                    defaultValue={adminProfile.emergencyContact.name}
+                    placeholder="Enter contact name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="emergencyRelationship">Relationship</Label>
+                  <Select name="emergencyRelationship" defaultValue={adminProfile.emergencyContact.relationship}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select relationship" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Spouse">Spouse</SelectItem>
+                      <SelectItem value="Parent">Parent</SelectItem>
+                      <SelectItem value="Sibling">Sibling</SelectItem>
+                      <SelectItem value="Child">Child</SelectItem>
+                      <SelectItem value="Friend">Friend</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="emergencyPhone">Phone Number</Label>
+                  <Input
+                    name="emergencyPhone"
+                    defaultValue={adminProfile.emergencyContact.phone}
+                    placeholder="+254700000000"
+                  />
+                </div>
+              </div>
             </div>
-            <Button type="submit" className="w-full">Update Profile</Button>
+
+            <Separator />
+
+            {/* Account Information */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">Account Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label>Date Joined</Label>
+                  <Input
+                    value={new Date(adminProfile.dateJoined).toLocaleDateString()}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <Label>Last Login</Label>
+                  <Input
+                    value={adminProfile.lastLogin}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Permissions</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {adminProfile.permissions.map((permission, index) => (
+                    <Badge key={index} variant="outline">
+                      {permission.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-6 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowProfileDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSecurityDialog(true)}
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                Security Settings
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
