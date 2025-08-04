@@ -320,6 +320,37 @@ export default function Dashboard() {
     ]
   });
 
+  const [adminProfile, setAdminProfile] = useState({
+    firstName: "System",
+    lastName: "Administrator",
+    username: "admin",
+    email: "admin@netsafi.com",
+    phone: "+254700000000",
+    alternatePhone: "",
+    department: "IT Management",
+    jobTitle: "System Administrator",
+    employeeId: "EMP001",
+    dateJoined: "2023-01-15",
+    profilePicture: "",
+    bio: "Experienced system administrator managing NetSafi ISP operations.",
+    address: {
+      street: "123 Technology Street",
+      city: "Nairobi",
+      state: "Nairobi County",
+      zipCode: "00100",
+      country: "Kenya"
+    },
+    emergencyContact: {
+      name: "",
+      relationship: "",
+      phone: ""
+    },
+    permissions: ["full_access", "user_management", "system_settings", "financial_access"],
+    lastLogin: "2024-01-18 10:30",
+    accountStatus: "Active",
+    twoFactorEnabled: false
+  });
+
   const [showPaymentConfigDialog, setShowPaymentConfigDialog] = useState(false);
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
