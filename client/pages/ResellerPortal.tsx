@@ -97,6 +97,9 @@ export default function ResellerPortal() {
   const [showRouterDialog, setShowRouterDialog] = useState(false);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [showNotificationsDialog, setShowNotificationsDialog] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   const [resellerData] = useState({
     company: "Nairobi Tech Solutions",
@@ -110,6 +113,52 @@ export default function ResellerPortal() {
     tier: "Gold",
     joinDate: "2023-11-15",
     license: "Pro"
+  });
+
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "Router Gateway Alpha is Online", message: "Your router is back online and serving 45 users", type: "success", time: "2 min ago", read: false },
+    { id: 2, title: "Low Credit Warning", message: "Your credit balance is below KES 10,000", type: "warning", time: "5 min ago", read: false },
+    { id: 3, title: "Voucher Sales Report", message: "15 vouchers sold today generating KES 2,340", type: "info", time: "1 hour ago", read: true },
+    { id: 4, title: "Commission Payment", message: "KES 3,500 commission credited to your account", type: "success", time: "2 hours ago", read: true },
+    { id: 5, title: "New Plan Added", message: "Daily Premium plan is now available for vouchers", type: "info", time: "1 day ago", read: true }
+  ]);
+
+  const [resellerSettings, setResellerSettings] = useState({
+    notifications: {
+      email: {
+        enabled: true,
+        lowCredit: true,
+        routerOffline: true,
+        dailyReports: false,
+        voucherSales: true,
+        commissionPayments: true
+      },
+      sms: {
+        enabled: true,
+        criticalAlerts: true,
+        routerDown: true,
+        lowCredit: false
+      },
+      push: {
+        enabled: true,
+        browserNotifications: true,
+        soundEnabled: true
+      }
+    },
+    preferences: {
+      language: "en",
+      timezone: "EAT",
+      currency: "KES",
+      dateFormat: "dd/MM/yyyy",
+      autoRefresh: true,
+      refreshInterval: 30,
+      defaultVoucherExpiry: 30
+    },
+    thresholds: {
+      lowCreditAmount: 10000,
+      routerOfflineMinutes: 5,
+      highUsageGB: 50
+    }
   });
 
   const [license] = useState({
@@ -496,6 +545,68 @@ export default function ResellerPortal() {
     }, 2000);
   };
 
+  // Notification Functions
+  const markNotificationRead = (id: number) => {
+    setNotifications(notifications.map(n =>
+      n.id === id ? { ...n, read: true } : n
+    ));
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const handleSettingsSave = (formData: FormData) => {
+    setResellerSettings({
+      notifications: {
+        email: {
+          enabled: formData.get('emailEnabled') === 'on',
+          lowCredit: formData.get('emailLowCredit') === 'on',
+          routerOffline: formData.get('emailRouterOffline') === 'on',
+          dailyReports: formData.get('emailDailyReports') === 'on',
+          voucherSales: formData.get('emailVoucherSales') === 'on',
+          commissionPayments: formData.get('emailCommissionPayments') === 'on'
+        },
+        sms: {
+          enabled: formData.get('smsEnabled') === 'on',
+          criticalAlerts: formData.get('smsCriticalAlerts') === 'on',
+          routerDown: formData.get('smsRouterDown') === 'on',
+          lowCredit: formData.get('smsLowCredit') === 'on'
+        },
+        push: {
+          enabled: formData.get('pushEnabled') === 'on',
+          browserNotifications: formData.get('pushBrowser') === 'on',
+          soundEnabled: formData.get('pushSound') === 'on'
+        }
+      },
+      preferences: {
+        language: formData.get('language') as string,
+        timezone: formData.get('timezone') as string,
+        currency: formData.get('currency') as string,
+        dateFormat: formData.get('dateFormat') as string,
+        autoRefresh: formData.get('autoRefresh') === 'on',
+        refreshInterval: parseInt(formData.get('refreshInterval') as string),
+        defaultVoucherExpiry: parseInt(formData.get('defaultVoucherExpiry') as string)
+      },
+      thresholds: {
+        lowCreditAmount: parseInt(formData.get('lowCreditAmount') as string),
+        routerOfflineMinutes: parseInt(formData.get('routerOfflineMinutes') as string),
+        highUsageGB: parseInt(formData.get('highUsageGB') as string)
+      }
+    });
+    setShowSettingsDialog(false);
+    alert('Settings saved successfully!');
+  };
+
+  const handleProfileUpdate = (formData: FormData) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      alert('Profile updated successfully!');
+      setShowProfileDialog(false);
+    }, 1500);
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -632,10 +743,15 @@ export default function ResellerPortal() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowNotificationsDialog(true)} className="relative">
               <Bell className="h-4 w-4" />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="h-4 w-4" />
             </Button>
           </div>
