@@ -1596,7 +1596,7 @@ export default function Dashboard() {
 
                     <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                       <div className="flex items-center space-x-3">
-                        <Database className="h-5 w-5 text-purple-600" />
+                        <Server className="h-5 w-5 text-purple-600" />
                         <div>
                           <p className="font-medium">System Settings</p>
                           <p className="text-sm text-slate-500">Configure system-wide settings</p>
