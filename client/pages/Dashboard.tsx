@@ -577,6 +577,69 @@ export default function Dashboard() {
     alert('Security settings updated successfully!');
   };
 
+  const handleProfileUpdate = (formData) => {
+    setIsLoading(true);
+
+    // Validate required fields
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
+    for (const field of requiredFields) {
+      if (!formData.get(field)) {
+        alert(`${field} is required!`);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Validate email format
+    const email = formData.get('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address!');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate phone format
+    const phone = formData.get('phone');
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+      alert('Please enter a valid phone number!');
+      setIsLoading(false);
+      return;
+    }
+
+    setTimeout(() => {
+      setAdminProfile(prev => ({
+        ...prev,
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        username: formData.get('username'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        alternatePhone: formData.get('alternatePhone') || '',
+        department: formData.get('department'),
+        jobTitle: formData.get('jobTitle'),
+        bio: formData.get('bio') || '',
+        address: {
+          street: formData.get('street') || '',
+          city: formData.get('city') || '',
+          state: formData.get('state') || '',
+          zipCode: formData.get('zipCode') || '',
+          country: formData.get('country') || 'Kenya'
+        },
+        emergencyContact: {
+          name: formData.get('emergencyName') || '',
+          relationship: formData.get('emergencyRelationship') || '',
+          phone: formData.get('emergencyPhone') || ''
+        }
+      }));
+
+      setIsLoading(false);
+      setShowProfileDialog(false);
+      alert('Profile updated successfully!');
+    }, 1500);
+  };
+
   const handleSave = (formData, type) => {
     switch(type) {
       case 'plan':
