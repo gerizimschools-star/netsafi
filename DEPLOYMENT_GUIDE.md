@@ -207,7 +207,7 @@ Before deploying, ensure you have:
 
 ---
 
-## 🐳 Option 4: Docker Deployment
+## 🐳 Option 5: Docker Deployment
 
 ### Create Dockerfile
 ```dockerfile
