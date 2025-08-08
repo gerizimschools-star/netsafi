@@ -55,24 +55,49 @@ export const checkDatabaseHealth = async (): Promise<boolean> => {
 // Initialize database (create tables if they don't exist)
 export const initializeDatabase = async () => {
   try {
-    // Check if users table exists
+    // Check if main tables exist
     const tableCheck = await query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
-        AND table_name = 'users'
+        AND table_name = 'admin_users'
       );
     `);
 
     if (!tableCheck.rows[0].exists) {
-      console.log('Database tables not found. Please run the schema.sql file to set up the database.');
-      console.log('You can run: psql -d php_radius_db -f database/schema.sql');
+      console.log('🗄️  Database tables not found. Please run the complete functional schema to set up the database.');
+      console.log('📋 Run: psql -d your_database_name -f database/complete_functional_schema.sql');
+      console.log('🔧 Or use the Docker setup: docker-compose up -d');
     } else {
-      console.log('Database tables found. Database is ready.');
+      console.log('✅ Database tables found. NetSafi ISP database is ready.');
+
+      // Check if admin user exists
+      const adminCheck = await query(`
+        SELECT COUNT(*) as count FROM admin_users WHERE username = 'admin'
+      `);
+
+      if (parseInt(adminCheck.rows[0].count) === 0) {
+        console.log('⚠️  No admin user found. Creating default admin user...');
+        // Create default admin user (password: admin123)
+        await query(`
+          INSERT INTO admin_users (username, password_hash, email, first_name, last_name, role, permissions)
+          VALUES ('admin', '$2b$10$N9qo8uLOickgx2ZMRZoMye.fUk8Q.j4Zl.E/cPUvWZLIdjklQnzuy', 'admin@netsafi.com', 'System', 'Administrator', 'super_admin',
+                  ARRAY['user_management', 'reseller_management', 'router_management', 'plan_management', 'financial_management', 'system_settings', 'audit_logs'])
+        `);
+        console.log('👤 Default admin user created (username: admin, password: admin123)');
+      }
+
+      console.log('🚀 NetSafi ISP Billing System ready for use!');
     }
   } catch (error) {
-    console.warn('PostgreSQL database not available. The app will use mock data.');
-    console.log('To set up PostgreSQL, see database/README.md for instructions.');
+    console.warn('⚠️  PostgreSQL database not available or not properly configured.');
+    console.log('📖 To set up PostgreSQL:');
+    console.log('   1. Install PostgreSQL');
+    console.log('   2. Create database: createdb netsafi_billing');
+    console.log('   3. Run schema: psql -d netsafi_billing -f database/complete_functional_schema.sql');
+    console.log('   4. Update .env with correct database credentials');
+    console.log('');
+    console.log('🐳 Or use Docker: docker-compose up -d');
   }
 };
 
