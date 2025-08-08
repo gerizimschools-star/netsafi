@@ -25,7 +25,62 @@ Before deploying, ensure you have:
 
 ---
 
-## 🌐 Option 1: Netlify Deployment (Recommended)
+## 🏠 Option 1: cPanel Shared Hosting Deployment
+
+### Why cPanel Hosting?
+- ✅ Budget-friendly shared hosting
+- ✅ Works with most hosting providers (Hostgator, GoDaddy, Bluehost, etc.)
+- ✅ SQLite database (no separate DB server needed)
+- ✅ Easy file management through cPanel
+- ✅ Automatic SSL and domain management
+- ⚠️ Node.js support required (check with your provider)
+
+### Steps:
+
+1. **Build for cPanel**
+   ```bash
+   npm run build:production:cpanel
+   ```
+   This creates a `cpanel-deploy` folder with all necessary files.
+
+2. **Upload to cPanel**
+   - Access cPanel File Manager
+   - Upload contents of `cpanel-deploy` folder
+   - Place `public_html` contents in your domain root
+   - Keep `api`, `database` folders in domain directory
+
+3. **Configure Environment**
+   - Copy `.env.example` to `.env`
+   - Edit with your production settings:
+   ```
+   NODE_ENV=production
+   DB_TYPE=sqlite
+   DB_PATH=./database/netsafi.db
+   JWT_SECRET=your-secure-secret
+   APP_URL=https://yourdomain.com
+   ```
+
+4. **Set Permissions**
+   - Folders: 755 permissions
+   - Files: 644 permissions
+   - Database folder: 755 (writable)
+
+5. **Test Deployment**
+   - Visit: `https://yourdomain.com/api/health`
+   - Should show database status
+   - Visit: `https://yourdomain.com`
+   - Should load the application
+
+### Troubleshooting cPanel:
+- **API not working**: Enable Node.js in cPanel (contact support if not available)
+- **Database errors**: Check folder permissions and .env configuration
+- **500 errors**: Check cPanel error logs for details
+
+📖 **Detailed Guide**: See `CPANEL_HOSTING_GUIDE.md` for complete instructions.
+
+---
+
+## 🌐 Option 2: Netlify Deployment (Recommended for Serverless)
 
 ### Why Netlify?
 - ✅ Already configured in your project
