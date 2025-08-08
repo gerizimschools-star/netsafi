@@ -16,6 +16,7 @@
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
     "build:production": "bash scripts/build-production.sh",
+    "build:production:cpanel": "bash scripts/build-cpanel.sh",
     "start": "node dist/server/node-build.mjs",
     "start:production": "NODE_ENV=production node dist/server/production.mjs",
     "test": "vitest --run",
@@ -38,6 +39,7 @@
   },
   "dependencies": {
     "@types/pg": "^8.15.5",
+    "@types/sqlite3": "^3.1.11",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.0",
     "express": "^4.18.2",
@@ -46,6 +48,7 @@
     "pg": "^8.16.3",
     "qrcode": "^1.5.3",
     "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {
