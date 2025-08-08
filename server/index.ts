@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { initializeDatabase, checkDatabaseHealth } from "./database";
 
 // Import API route handlers
+// Import existing route handlers
 import {
   getAllUsers,
   getUser,
@@ -34,6 +35,70 @@ import {
   addNetworkLocation,
   deleteNetworkLocation
 } from "./routes/network";
+
+// Import new comprehensive route handlers
+import {
+  getAllRouters,
+  getRouter,
+  createRouter,
+  updateRouter,
+  deleteRouter,
+  updateRouterStatus,
+  syncRouter,
+  getRouterStats,
+  assignRouterToReseller
+} from "./routes/routers";
+
+import {
+  getAllPlans,
+  getPlan,
+  createPlan,
+  updatePlan,
+  deletePlan,
+  togglePlanStatus,
+  getPlanCategories,
+  getPlanStats,
+  duplicatePlan
+} from "./routes/plans";
+
+import {
+  getAllResellers,
+  getReseller,
+  createReseller,
+  updateReseller,
+  deleteReseller,
+  updateResellerStatus,
+  updateVerificationStatus,
+  updateResellerCredit,
+  getResellerStats,
+  getResellerTiers,
+  regenerateApiCredentials
+} from "./routes/resellers";
+
+import {
+  getAllVouchers,
+  getVoucher,
+  generateVouchers,
+  updateVoucher,
+  cancelVoucher,
+  useVoucher,
+  getVoucherStats,
+  exportVouchers,
+  getBatchInfo
+} from "./routes/vouchers";
+
+import {
+  getAllCustomers,
+  getCustomer,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
+  updateCustomerStatus,
+  updateCustomerPlan,
+  getCustomerStats,
+  searchCustomers,
+  sendMessage
+} from "./routes/customers";
 
 export function createServer() {
   const app = express();
