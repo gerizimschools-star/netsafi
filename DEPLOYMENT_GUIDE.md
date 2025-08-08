@@ -121,7 +121,7 @@ Before deploying, ensure you have:
 
 ---
 
-## ⚡ Option 2: Vercel Deployment
+## ⚡ Option 3: Vercel Deployment
 
 ### Steps:
 
