@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { initializeDatabase, checkDatabaseHealth } from "./database";
+import { initializeDatabase, checkDatabaseHealth, getDatabaseType, getDatabaseInfo } from "./database-unified";
 
 // Import API route handlers
 // Import existing route handlers
