@@ -1,62 +1,144 @@
+# NetSafi ISP Billing - Docker ignore file
+# Exclude unnecessary files from Docker build context
+
+# Dependencies
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
 dist
-.git
-.gitignore
-README.md
+build
+
+# Environment files
 .env
 .env.local
 .env.development
 .env.test
 .env.production
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.DS_Store
+
+# IDE and editor files
 .vscode
 .idea
 *.swp
 *.swo
 *~
-.cursor
-coverage
-.nyc_output
-.eslintcache
-*.log
-*.lock
-*.tmp
-*.tmp.*
-log.txt
 
+# OS generated files
 .DS_Store
-node_modules
-**/node_modules/**
-build
-data
-.env
-load-ids.txt
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-server
-tmp
-types
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Git
 .git
 .gitignore
-dist
-service
-tests
-fixtures-pages
-fixtures-apps
+README.md
+DEPLOYMENT_GUIDE.md
 
-# Netlify
-.netlify
-packages/ml-air/lib
-packages/ml-air/bin
-packages/ml-air/project
-packages/ml-air/share
-packages/ml-air/random_forest_classification/
-packages/ml-air/__pycache__/
-packages/ml-air/app/__pycache__/
-packages/vcp-common/native-bridge/build
-packages/vcp-common/_tests_/dataset-ranking.csv
-node_modules/
+# Docker files
 Dockerfile
-.gitignore
+docker-compose.yml
+.dockerignore
+
+# Scripts and documentation
+scripts/
+docs/
+
+# Test files
+*.test.js
+*.spec.js
+__tests__/
+
+# Backup files
+backups/
+*.backup
+*.dump
+
+# Uploads and temporary files
+uploads/
+temp/
+tmp/
+
+# SSL certificates
+*.pem
+*.crt
+*.key
+ssl/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Misc
+.nyc_output
+coverage/
+.vscode/
+*.tsbuildinfo
