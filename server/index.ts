@@ -159,9 +159,14 @@ export function createServer() {
       const uptime = process.uptime();
       const memoryUsage = process.memoryUsage();
 
+      const dbInfo = getDatabaseInfo();
       res.json({
         status: "healthy",
-        database: dbHealth ? "connected" : "disconnected",
+        database: {
+          type: getDatabaseType(),
+          status: dbHealth ? "connected" : "disconnected",
+          config: dbInfo.config
+        },
         uptime: `${Math.floor(uptime / 60)} minutes`,
         memory: {
           used: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`,
