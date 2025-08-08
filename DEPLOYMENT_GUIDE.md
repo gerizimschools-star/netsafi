@@ -141,7 +141,7 @@ Before deploying, ensure you have:
 
 ---
 
-## 🖥️ Option 3: Traditional Server (VPS/Cloud)
+## 🖥️ Option 4: Traditional Server (VPS/Cloud)
 
 ### Requirements:
 - Ubuntu/CentOS server
