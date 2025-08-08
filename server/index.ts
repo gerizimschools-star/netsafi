@@ -245,7 +245,7 @@ export function createServer() {
   app.patch("/api/invoices/:id/status", updateInvoiceStatus);
   app.patch("/api/invoices/:id/payment", processPayment);
 
-  // Network API routes
+  // Network API routes (legacy)
   app.get("/api/network", getNetworkLocations);
   app.get("/api/network/stats", getNetworkStats);
   app.get("/api/network/:id", getNetworkLocation);
@@ -253,6 +253,64 @@ export function createServer() {
   app.patch("/api/network/:id", updateNetworkStatus);
   app.post("/api/network/refresh", refreshNetworkData);
   app.delete("/api/network/:id", deleteNetworkLocation);
+
+  // Comprehensive Router API routes
+  app.get("/api/routers", getAllRouters);
+  app.get("/api/routers/stats", getRouterStats);
+  app.get("/api/routers/:id", getRouter);
+  app.post("/api/routers", createRouter);
+  app.put("/api/routers/:id", updateRouter);
+  app.patch("/api/routers/:id/status", updateRouterStatus);
+  app.post("/api/routers/:id/sync", syncRouter);
+  app.delete("/api/routers/:id", deleteRouter);
+  app.post("/api/routers/assign", assignRouterToReseller);
+
+  // Internet Plans API routes
+  app.get("/api/plans", getAllPlans);
+  app.get("/api/plans/stats", getPlanStats);
+  app.get("/api/plans/categories", getPlanCategories);
+  app.get("/api/plans/:id", getPlan);
+  app.post("/api/plans", createPlan);
+  app.put("/api/plans/:id", updatePlan);
+  app.patch("/api/plans/:id/toggle", togglePlanStatus);
+  app.post("/api/plans/:id/duplicate", duplicatePlan);
+  app.delete("/api/plans/:id", deletePlan);
+
+  // Resellers API routes
+  app.get("/api/resellers", getAllResellers);
+  app.get("/api/resellers/stats", getResellerStats);
+  app.get("/api/resellers/tiers", getResellerTiers);
+  app.get("/api/resellers/:id", getReseller);
+  app.post("/api/resellers", createReseller);
+  app.put("/api/resellers/:id", updateReseller);
+  app.patch("/api/resellers/:id/status", updateResellerStatus);
+  app.patch("/api/resellers/:id/verification", updateVerificationStatus);
+  app.patch("/api/resellers/:id/credit", updateResellerCredit);
+  app.post("/api/resellers/:id/regenerate-api", regenerateApiCredentials);
+  app.delete("/api/resellers/:id", deleteReseller);
+
+  // Vouchers API routes
+  app.get("/api/vouchers", getAllVouchers);
+  app.get("/api/vouchers/stats", getVoucherStats);
+  app.get("/api/vouchers/export", exportVouchers);
+  app.get("/api/vouchers/batch/:batch_id", getBatchInfo);
+  app.get("/api/vouchers/:id", getVoucher);
+  app.post("/api/vouchers/generate", generateVouchers);
+  app.put("/api/vouchers/:id", updateVoucher);
+  app.patch("/api/vouchers/:id/cancel", cancelVoucher);
+  app.post("/api/vouchers/:code/use", useVoucher);
+
+  // Customers API routes
+  app.get("/api/customers", getAllCustomers);
+  app.get("/api/customers/stats", getCustomerStats);
+  app.get("/api/customers/search", searchCustomers);
+  app.get("/api/customers/:id", getCustomer);
+  app.post("/api/customers", createCustomer);
+  app.put("/api/customers/:id", updateCustomer);
+  app.patch("/api/customers/:id/status", updateCustomerStatus);
+  app.patch("/api/customers/:id/plan", updateCustomerPlan);
+  app.post("/api/customers/:id/message", sendMessage);
+  app.delete("/api/customers/:id", deleteCustomer);
 
   return app;
 }
