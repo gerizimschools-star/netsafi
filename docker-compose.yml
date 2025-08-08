@@ -1,0 +1,184 @@
+# NetSafi ISP Billing - Docker Compose Configuration
+# Complete stack deployment with database and application
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: netsafi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-netsafi_billing}
+      POSTGRES_USER: ${DB_USER:-netsafi_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+      - ./backups:/backups
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - netsafi_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-netsafi_user} -d ${DB_NAME:-netsafi_billing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: netsafi-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - netsafi_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # NetSafi Application
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: netsafi-app
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-netsafi_billing}
+      DB_USER: ${DB_USER:-netsafi_user}
+      DB_PASSWORD: ${DB_PASSWORD:-secure_password}
+      
+      # Server Configuration
+      NODE_ENV: production
+      PORT: 8080
+      
+      # Security
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-this}
+      SESSION_SECRET: ${SESSION_SECRET:-your-session-secret-change-this}
+      
+      # Application URLs
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      API_URL: ${API_URL:-http://localhost:8080/api}
+      
+      # Redis (if enabled)
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379
+      
+      # Company Information
+      COMPANY_NAME: ${COMPANY_NAME:-NetSafi ISP}
+      COMPANY_EMAIL: ${COMPANY_EMAIL:-admin@netsafi.com}
+      COMPANY_PHONE: ${COMPANY_PHONE:-+254700000000}
+      
+      # Feature Flags
+      ENABLE_REDIS_CACHE: ${ENABLE_REDIS_CACHE:-false}
+      ENABLE_DEBUG_MODE: ${ENABLE_DEBUG_MODE:-false}
+      ENABLE_ANALYTICS: ${ENABLE_ANALYTICS:-true}
+      
+      # Monitoring
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_ACCESS_LOGS: ${ENABLE_ACCESS_LOGS:-true}
+      
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      - app_uploads:/app/uploads
+      - app_logs:/app/logs
+      - ./backups:/app/backups:ro
+    networks:
+      - netsafi_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => { process.exit(1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: netsafi-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - netsafi_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database Backup Service
+  backup:
+    image: postgres:15-alpine
+    container_name: netsafi-backup
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      PGHOST: database
+      PGDATABASE: ${DB_NAME:-netsafi_billing}
+      PGUSER: ${DB_USER:-netsafi_user}
+      PGPASSWORD: ${DB_PASSWORD:-secure_password}
+    volumes:
+      - ./backups:/backups
+      - ./scripts:/scripts:ro
+    networks:
+      - netsafi_network
+    command: >
+      sh -c "
+        echo 'Starting backup service...'
+        while true; do
+          sleep 86400
+          echo 'Creating database backup...'
+          pg_dump > /backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+          echo 'Backup completed'
+          # Keep only last 7 days of backups
+          find /backups -name 'backup_*.sql' -mtime +7 -delete
+        done
+      "
+
+# Networks
+networks:
+  netsafi_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_uploads:
+    driver: local
+  app_logs:
+    driver: local
+  nginx_logs:
+    driver: local
