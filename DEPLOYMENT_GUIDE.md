@@ -6,10 +6,11 @@ This guide will help you deploy the NetSafi ISP Billing system to various hostin
 
 Your project is already configured for multiple hosting options:
 
-### Option 1: Netlify (Recommended for Frontend + Serverless)
-### Option 2: Vercel (Alternative Serverless)
-### Option 3: Traditional Server (VPS/Cloud)
-### Option 4: Docker Deployment
+### Option 1: cPanel Shared Hosting (Perfect for Budget Hosting)
+### Option 2: Netlify (Recommended for Frontend + Serverless)
+### Option 3: Vercel (Alternative Serverless)
+### Option 4: Traditional Server (VPS/Cloud)
+### Option 5: Docker Deployment
 
 ---
 
