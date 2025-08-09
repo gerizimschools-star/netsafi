@@ -135,23 +135,31 @@ class SQLiteDatabase {
   private async runSchemaFile(): Promise<void> {
     try {
       const schemaPath = path.join(process.cwd(), 'database', 'sqlite_cpanel_schema.sql');
-      
+
       if (!fs.existsSync(schemaPath)) {
         throw new Error(`Schema file not found: ${schemaPath}`);
       }
 
       const schema = fs.readFileSync(schemaPath, 'utf8');
-      
+
       // Split schema into individual statements
       const statements = schema
         .split(';')
         .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.startsWith('PRAGMA'));
 
-      // Execute each statement
+      // Execute each statement with error handling
       for (const statement of statements) {
         if (statement.trim()) {
-          await this.run(statement);
+          try {
+            await this.run(statement);
+          } catch (error) {
+            // Skip errors for already existing objects
+            if (!error.message.includes('already exists') &&
+                !error.message.includes('duplicate')) {
+              console.warn('Schema statement warning:', error.message, 'Statement:', statement.substring(0, 100));
+            }
+          }
         }
       }
     } catch (error) {
