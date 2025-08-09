@@ -3,8 +3,15 @@ import { get, run } from "./database-unified";
 
 async function fixAdminPassword() {
   try {
-    console.log('Fixing admin password...');
-    
+    console.log('Checking database tables...');
+
+    // First check what tables exist
+    const tables = await get(`
+      SELECT name FROM sqlite_master
+      WHERE type='table' AND name NOT LIKE 'sqlite_%'
+    `);
+    console.log('Available tables:', tables);
+
     // Check if admin user exists
     const admin = await get('SELECT * FROM admin_users WHERE username = ?', ['admin']);
     console.log('Current admin user:', admin ? 'exists' : 'not found');
