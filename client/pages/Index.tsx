@@ -1,13 +1,4 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Shield, Wifi, Activity, Lock } from "lucide-react";
-import TwoFactorVerification from "@/components/TwoFactorVerification";
-import TwoFactorSetup from "@/components/TwoFactorSetup";
+import EnhancedLogin from "@/components/EnhancedLogin";
 
 export default function Index() {
   const navigate = useNavigate();
