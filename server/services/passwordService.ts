@@ -46,32 +46,11 @@ export class PasswordService {
     isValid: boolean;
     errors: string[];
   }> {
-    const rules = await this.getPasswordComplexityRules(customRules);
-    const errors: string[] = [];
-
-    if (password.length < rules.minLength) {
-      errors.push(`Password must be at least ${rules.minLength} characters long`);
-    }
-
-    if (rules.requireUppercase && !/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-
-    if (rules.requireLowercase && !/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-
-    if (rules.requireNumbers && !/\d/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-
-    if (rules.requireSymbols && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      errors.push('Password must contain at least one special character');
-    }
-
+    // Use SecurityConfigService for password validation
+    const result = await SecurityConfigService.validatePassword(password);
     return {
-      isValid: errors.length === 0,
-      errors
+      isValid: result.isValid,
+      errors: result.isValid ? [] : [result.message]
     };
   }
 
