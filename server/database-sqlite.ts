@@ -134,7 +134,7 @@ class SQLiteDatabase {
 
   private async runSchemaFile(): Promise<void> {
     try {
-      const schemaPath = path.join(process.cwd(), 'database', 'sqlite_cpanel_schema.sql');
+      const schemaPath = path.join(process.cwd(), 'database', 'sqlite_dev_schema.sql');
 
       if (!fs.existsSync(schemaPath)) {
         throw new Error(`Schema file not found: ${schemaPath}`);
