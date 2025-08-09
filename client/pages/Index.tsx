@@ -196,16 +196,17 @@ export default function Index() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="ispId" className="text-slate-700 font-medium">ISP ID</Label>
-              <Input
-                id="ispId"
-                type="text"
-                placeholder="Enter your ISP ID"
-                value={formData.ispId}
-                onChange={(e) => handleInputChange("ispId", e.target.value)}
-                className="h-11 border-slate-200 bg-white/50 focus:bg-white transition-colors"
+              <Label htmlFor="userType" className="text-slate-700 font-medium">Account Type</Label>
+              <select
+                id="userType"
+                value={formData.userType}
+                onChange={(e) => handleInputChange("userType", e.target.value)}
+                className="w-full h-11 px-3 border border-slate-200 bg-white/50 focus:bg-white rounded-md transition-colors"
                 disabled={isLoading}
-              />
+              >
+                <option value="admin">Administrator</option>
+                <option value="reseller">Reseller</option>
+              </select>
             </div>
 
             <div className="space-y-2">
