@@ -14,11 +14,15 @@ export default function Index() {
   const [formData, setFormData] = useState({
     ispId: "",
     username: "",
-    password: ""
+    password: "",
+    userType: "admin"
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [authStep, setAuthStep] = useState<'login' | '2fa' | '2fa-setup'>('login');
+  const [tempUserId, setTempUserId] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
