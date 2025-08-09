@@ -278,6 +278,8 @@ export function createServer() {
   app.get("/api/auth/security-config", getSecurityConfig);
   app.post("/api/auth/security-config", updateSecurityConfig);
   app.post("/api/auth/validate-password", validatePassword);
+  app.get("/api/auth/security-metrics", getSecurityMetrics);
+  app.post("/api/auth/cleanup-audit-logs", cleanupAuditLogs);
 
   // Legacy demo endpoint
   app.get("/api/demo", handleDemo);
