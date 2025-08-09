@@ -299,6 +299,92 @@ INSERT OR IGNORE INTO internet_plans (
 ('plan-unlimited-001', 'Unlimited Plan', 'Unlimited data for heavy users', 'residential', 50, 10, NULL, 50.00, 'monthly', 30),
 ('plan-business-001', 'Business Starter', 'Reliable connectivity for small business', 'business', 20, 5, 102400, 75.00, 'monthly', 30);
 
+-- OTP Codes table for email/SMS verification
+CREATE TABLE IF NOT EXISTS otp_codes (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    user_type TEXT NOT NULL,
+    purpose TEXT NOT NULL,
+    code_hash TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    max_attempts INTEGER DEFAULT 3,
+    attempts_used INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    used_at DATETIME
+);
+
+-- Audit Logs table
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    user_type TEXT,
+    action TEXT NOT NULL,
+    resource TEXT NOT NULL,
+    details TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    success BOOLEAN NOT NULL,
+    error_message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sign-in Logs table
+CREATE TABLE IF NOT EXISTS sign_in_logs (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    username TEXT NOT NULL,
+    user_type TEXT NOT NULL,
+    success BOOLEAN NOT NULL,
+    failure_reason TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    two_factor_used BOOLEAN DEFAULT FALSE,
+    two_factor_method TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Password Reset Logs table
+CREATE TABLE IF NOT EXISTS password_reset_logs (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    user_type TEXT NOT NULL,
+    initiated_by TEXT NOT NULL,
+    initiator_id TEXT,
+    method TEXT NOT NULL,
+    success BOOLEAN NOT NULL,
+    ip_address TEXT,
+    user_agent TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Password Reset Tokens table
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    user_type TEXT NOT NULL,
+    token_hash TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    used_at DATETIME
+);
+
+-- User Security Settings table
+CREATE TABLE IF NOT EXISTS user_security_settings (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    user_type TEXT NOT NULL,
+    login_attempts INTEGER DEFAULT 0,
+    last_failed_login DATETIME,
+    account_locked_until DATETIME,
+    forgot_password_enabled BOOLEAN DEFAULT TRUE,
+    two_factor_method_preference TEXT DEFAULT 'totp',
+    notification_preferences TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert default system settings
 INSERT OR IGNORE INTO system_settings (key, value, description, category) VALUES
 ('company_name', 'NetSafi ISP', 'Company name displayed in the system', 'general'),
@@ -306,4 +392,14 @@ INSERT OR IGNORE INTO system_settings (key, value, description, category) VALUES
 ('default_currency', 'USD', 'Default currency for transactions', 'billing'),
 ('tax_rate', '0.16', 'Default tax rate (16%)', 'billing'),
 ('session_timeout', '3600', 'Session timeout in seconds', 'security'),
-('max_login_attempts', '5', 'Maximum login attempts before lockout', 'security');
+('max_login_attempts', '5', 'Maximum login attempts before lockout', 'security'),
+('otp_expiration_minutes', '5', 'OTP expiration time in minutes', 'security'),
+('otp_max_attempts', '3', 'Maximum OTP verification attempts', 'security'),
+('password_reset_expiration_minutes', '15', 'Password reset link expiration in minutes', 'security'),
+('audit_log_retention_days', '90', 'Audit log retention period in days', 'security'),
+('account_lockout_duration_minutes', '30', 'Account lockout duration in minutes', 'security'),
+('password_min_length', '8', 'Minimum password length', 'security'),
+('password_require_uppercase', 'true', 'Require uppercase letters in password', 'security'),
+('password_require_lowercase', 'true', 'Require lowercase letters in password', 'security'),
+('password_require_numbers', 'true', 'Require numbers in password', 'security'),
+('password_require_symbols', 'true', 'Require symbols in password', 'security');
