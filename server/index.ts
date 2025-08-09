@@ -272,6 +272,11 @@ export function createServer() {
   app.get("/api/auth/audit-logs", getAuditLogs);
   app.get("/api/auth/signin-stats", getSignInStats);
 
+  // Security Configuration API routes
+  app.get("/api/auth/security-config", getSecurityConfig);
+  app.post("/api/auth/security-config", updateSecurityConfig);
+  app.post("/api/auth/validate-password", validatePassword);
+
   // Legacy demo endpoint
   app.get("/api/demo", handleDemo);
 
