@@ -37,10 +37,10 @@ async function fixAdminPassword() {
     
     // Also try to create user "administrator" in case that's what's expected
     const administrator = await get('SELECT * FROM admin_users WHERE username = ?', ['administrator']);
-    
+
     if (!administrator) {
       const adminPasswordHash = await bcrypt.hash('demo1234', 10);
-      
+
       await run(`
         INSERT INTO admin_users (
           id, username, email, password_hash, first_name, last_name, role, status,
@@ -59,11 +59,13 @@ async function fixAdminPassword() {
         0,
         1
       ]);
-      
+
       console.log('✅ Administrator user created successfully!');
       console.log('   Username: administrator');
       console.log('   Password: demo1234');
       console.log('   2FA mandatory: true');
+    } else {
+      console.log('Administrator user already exists');
     }
     
   } catch (error) {
