@@ -291,6 +291,21 @@ export default function EnhancedLogin() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Fetch development OTP
+  const fetchDevOTP = async () => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    try {
+      const response = await fetch('/api/auth/dev-otp');
+      const data = await response.json();
+      if (data.success && data.otp) {
+        setDevOTP(data.otp.code);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dev OTP:', err);
+    }
+  };
+
   const getMethodIcon = (method: string) => {
     switch (method) {
       case 'totp': return <Smartphone className="h-4 w-4" />;
