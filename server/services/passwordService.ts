@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { query, run, get } from "../database-unified";
 import { OTPService } from './otpService';
 import { AuditService } from './auditService';
+import { SecurityConfigService } from './securityConfigService';
 
 export interface PasswordComplexityRules {
   minLength: number;
