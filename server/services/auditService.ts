@@ -243,6 +243,83 @@ export class AuditService {
   }
 
   /**
+   * Get detailed security metrics
+   */
+  static async getSecurityMetrics(filters: {
+    startDate?: Date;
+    endDate?: Date;
+  } = {}): Promise<any> {
+    let whereClause = '';
+    const params: any[] = [];
+    const conditions: string[] = [];
+
+    if (filters.startDate) {
+      conditions.push('created_at >= ?');
+      params.push(filters.startDate.toISOString());
+    }
+
+    if (filters.endDate) {
+      conditions.push('created_at <= ?');
+      params.push(filters.endDate.toISOString());
+    }
+
+    if (conditions.length > 0) {
+      whereClause = 'WHERE ' + conditions.join(' AND ');
+    }
+
+    // Get comprehensive security metrics
+    const [signInMetrics] = await query(`
+      SELECT
+        COUNT(*) as total_sign_in_attempts,
+        SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_sign_ins,
+        SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) as failed_sign_ins,
+        SUM(CASE WHEN two_factor_used = 1 THEN 1 ELSE 0 END) as two_factor_sign_ins,
+        COUNT(DISTINCT user_id) as unique_users_signed_in,
+        COUNT(DISTINCT ip_address) as unique_ips
+      FROM sign_in_logs
+      ${whereClause}
+    `, params);
+
+    const [passwordResetMetrics] = await query(`
+      SELECT
+        COUNT(*) as total_password_resets,
+        SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_password_resets,
+        SUM(CASE WHEN initiated_by = 'admin' THEN 1 ELSE 0 END) as admin_initiated_resets,
+        SUM(CASE WHEN initiated_by = 'user' THEN 1 ELSE 0 END) as user_initiated_resets
+      FROM password_reset_logs
+      ${whereClause}
+    `, params);
+
+    const [accountLockouts] = await query(`
+      SELECT
+        COUNT(*) as total_account_lockouts
+      FROM audit_logs
+      WHERE action = 'account_lockout' ${conditions.length > 0 ? 'AND ' + conditions.join(' AND ') : ''}
+    `, params);
+
+    const [otpMetrics] = await query(`
+      SELECT
+        COUNT(*) as total_otp_requests,
+        SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) as successful_otp_verifications,
+        SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) as expired_otps,
+        SUM(CASE WHEN status = 'locked' THEN 1 ELSE 0 END) as locked_otps
+      FROM otp_codes
+      ${whereClause}
+    `, params);
+
+    return {
+      signInMetrics: signInMetrics || {},
+      passwordResetMetrics: passwordResetMetrics || {},
+      accountLockouts: accountLockouts?.total_account_lockouts || 0,
+      otpMetrics: otpMetrics || {},
+      period: {
+        startDate: filters.startDate?.toISOString(),
+        endDate: filters.endDate?.toISOString()
+      }
+    };
+  }
+
+  /**
    * Get sign-in statistics
    */
   static async getSignInStats(filters: {
