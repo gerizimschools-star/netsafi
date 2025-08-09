@@ -6,11 +6,11 @@ async function fixAdminPassword() {
     console.log('Checking database tables...');
 
     // First check what tables exist
-    const tables = await get(`
+    const tables = await query(`
       SELECT name FROM sqlite_master
       WHERE type='table' AND name NOT LIKE 'sqlite_%'
     `);
-    console.log('Available tables:', tables);
+    console.log('Available tables:', tables.map(t => t.name));
 
     // Check if admin user exists
     const admin = await get('SELECT * FROM admin_users WHERE username = ?', ['admin']);
