@@ -103,7 +103,7 @@ export const enhancedLogin: RequestHandler = async (req, res) => {
     if (requires2FA) {
       if (!twoFactorToken) {
         // Check what 2FA methods are available
-        const availableMethods = await this.getAvailable2FAMethods(user);
+        const availableMethods = await getAvailable2FAMethods(user);
         
         return res.status(200).json({
           success: true,
