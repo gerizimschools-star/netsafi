@@ -282,6 +282,9 @@ export function createServer() {
   app.get("/api/auth/security-metrics", getSecurityMetrics);
   app.post("/api/auth/cleanup-audit-logs", cleanupAuditLogs);
 
+  // Development routes (only available in development)
+  app.get("/api/auth/dev-otp", getDevOTP);
+
   // Legacy demo endpoint
   app.get("/api/demo", handleDemo);
 
