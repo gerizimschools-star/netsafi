@@ -301,8 +301,28 @@ Expires: ${expiresAt.toLocaleString()}
     try {
       // TODO: Integrate with SMS service (Twilio, AWS SNS, etc.)
       // For now, we'll log the SMS details and return success
-      console.log(`[SMS OTP] To: ${targetPhone}, Code: ${code}, Purpose: ${purpose}, Expires: ${expiresAt.toISOString()}`);
-      console.log(`SMS Message: "Your NetSafi verification code is: ${code}. Valid for ${Math.floor((expiresAt.getTime() - Date.now()) / 60000)} minutes. Do not share this code."`);
+      console.log(`
+==================================================
+📱 SMS OTP GENERATED FOR DEVELOPMENT
+==================================================
+To: ${targetPhone}
+Code: ${code}
+Purpose: ${purpose}
+Expires: ${expiresAt.toLocaleString()}
+Message: "Your NetSafi verification code is: ${code}. Valid for ${Math.floor((expiresAt.getTime() - Date.now()) / 60000)} minutes. Do not share this code."
+==================================================
+`);
+
+      // In development, store the OTP for easy access
+      if (process.env.NODE_ENV === 'development') {
+        global.lastGeneratedOTP = {
+          code,
+          phone: targetPhone,
+          purpose,
+          expiresAt,
+          timestamp: new Date()
+        };
+      }
 
       // In a real implementation, you would send the SMS here
       // Example with a hypothetical SMS service:
