@@ -58,7 +58,9 @@ import {
   getSignInStats,
   getSecurityConfig,
   updateSecurityConfig,
-  validatePassword
+  validatePassword,
+  getSecurityMetrics,
+  cleanupAuditLogs
 } from "./routes/enhancedAuth";
 
 // Import new comprehensive route handlers
