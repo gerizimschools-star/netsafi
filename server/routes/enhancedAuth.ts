@@ -536,18 +536,21 @@ export const getSignInStats: RequestHandler = async (req, res) => {
 
 // Helper functions
 async function handleFailedLogin(
-  userId: string, 
-  userType: string, 
+  userId: string,
+  userType: string,
   clientInfo: { ipAddress?: string; userAgent?: string }
 ): Promise<void> {
+  // Get current security configuration
+  const securityConfig = await SecurityConfigService.getSecurityConfig();
+
   // Get or create security settings
   let securitySettings = await get(`
-    SELECT * FROM user_security_settings 
+    SELECT * FROM user_security_settings
     WHERE user_id = ? AND user_type = ?
   `, [userId, userType]);
 
-  const maxAttempts = 5; // Get from system settings
-  const lockDuration = 30; // minutes
+  const maxAttempts = securityConfig.maxLoginAttempts;
+  const lockDuration = securityConfig.accountLockoutDurationMinutes;
 
   if (!securitySettings) {
     await run(`
