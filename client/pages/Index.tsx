@@ -29,16 +29,98 @@ export default function Index() {
     setIsLoading(true);
     setError("");
 
-    // Simulate login process
-    setTimeout(() => {
-      if (!formData.ispId || !formData.username || !formData.password) {
-        setError("All fields are required");
-        setIsLoading(false);
+    if (!formData.username || !formData.password) {
+      setError("Username and password are required");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          userType: formData.userType
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.requiresTwoFactor) {
+          // User needs to provide 2FA token
+          setTempUserId(data.userId);
+          setUserName(formData.username);
+          setAuthStep('2fa');
+        } else if (data.requiresTwoFactorSetup) {
+          // User needs to set up 2FA (mandatory)
+          setTempUserId(data.userId);
+          setUserName(formData.username);
+          setAuthStep('2fa-setup');
+        } else {
+          // Login successful
+          localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('user_data', JSON.stringify(data.user));
+          navigate("/dashboard");
+        }
       } else {
-        // Success case - redirect to dashboard
-        navigate("/dashboard");
+        setError(data.message || 'Login failed');
       }
-    }, 1000);
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTwoFactorVerify = async (token: string) => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          userType: formData.userType,
+          twoFactorToken: token
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_data', JSON.stringify(data.user));
+        navigate("/dashboard");
+      } else {
+        setError(data.message || '2FA verification failed');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTwoFactorSetupComplete = () => {
+    // After 2FA setup is complete, redirect to dashboard
+    navigate("/dashboard");
+  };
+
+  const handleBackToLogin = () => {
+    setAuthStep('login');
+    setTempUserId("");
+    setUserName("");
+    setError("");
   };
 
   const handleInputChange = (field: string, value: string) => {
