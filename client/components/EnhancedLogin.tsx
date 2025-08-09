@@ -64,6 +64,7 @@ export default function EnhancedLogin() {
     method: "email"
   });
   const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [devOTP, setDevOTP] = useState<string>('');
 
   // Timer for OTP expiration
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
