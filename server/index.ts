@@ -46,6 +46,18 @@ import {
   check2FAStatus
 } from "./routes/auth";
 
+// Import enhanced auth routes
+import {
+  enhancedLogin,
+  requestOTP,
+  forgotPassword,
+  resetPassword,
+  adminResetUserPassword,
+  toggleForgotPassword,
+  getAuditLogs,
+  getSignInStats
+} from "./routes/enhancedAuth";
+
 // Import new comprehensive route handlers
 import {
   getAllRouters,
