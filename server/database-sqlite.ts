@@ -135,12 +135,14 @@ class SQLiteDatabase {
   private async runSchemaFile(): Promise<void> {
     try {
       const schemaPath = path.join(process.cwd(), 'database', 'sqlite_dev_schema.sql');
+      console.log('Looking for schema file at:', schemaPath);
 
       if (!fs.existsSync(schemaPath)) {
         throw new Error(`Schema file not found: ${schemaPath}`);
       }
 
       const schema = fs.readFileSync(schemaPath, 'utf8');
+      console.log('Schema file read, length:', schema.length);
 
       // Split schema into individual statements
       const statements = schema
@@ -148,11 +150,16 @@ class SQLiteDatabase {
         .map(stmt => stmt.trim())
         .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.startsWith('PRAGMA'));
 
+      console.log('Total statements to execute:', statements.length);
+
       // Execute each statement with error handling
-      for (const statement of statements) {
+      for (let i = 0; i < statements.length; i++) {
+        const statement = statements[i];
         if (statement.trim()) {
           try {
+            console.log(`Executing statement ${i + 1}/${statements.length}:`, statement.substring(0, 50) + '...');
             await this.run(statement);
+            console.log(`✓ Statement ${i + 1} executed successfully`);
           } catch (error) {
             // Skip errors for already existing objects
             if (!error.message.includes('already exists') &&
@@ -162,6 +169,8 @@ class SQLiteDatabase {
           }
         }
       }
+
+      console.log('Schema execution completed');
     } catch (error) {
       console.error('Error running schema file:', error);
       throw error;
