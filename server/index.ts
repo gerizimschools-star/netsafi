@@ -239,6 +239,14 @@ export function createServer() {
     });
   }
 
+  // Authentication API routes
+  app.post("/api/auth/login", login);
+  app.post("/api/auth/setup-2fa", setup2FA);
+  app.post("/api/auth/verify-2fa", verify2FA);
+  app.post("/api/auth/disable-2fa", disable2FA);
+  app.post("/api/auth/generate-backup-codes", generateBackupCodes);
+  app.get("/api/auth/2fa-status", check2FAStatus);
+
   // Legacy demo endpoint
   app.get("/api/demo", handleDemo);
 
