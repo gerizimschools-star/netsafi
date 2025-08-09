@@ -557,27 +557,11 @@ export default function EnhancedLogin() {
               {!passwordResetSent ? (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="forgotUserType" className="text-slate-700 font-medium">Account Type</Label>
-                    <select
-                      id="forgotUserType"
-                      value={forgotPasswordData.userType}
-                      onChange={(e) => setForgotPasswordData(prev => ({ ...prev, userType: e.target.value }))}
-                      className="w-full h-11 px-3 border border-slate-200 bg-white/50 focus:bg-white rounded-md transition-colors"
-                      disabled={isLoading}
-                    >
-                      <option value="admin">Administrator</option>
-                      <option value="reseller">Reseller</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="forgotUsername" className="text-slate-700 font-medium">
-                      {forgotPasswordData.userType === 'reseller' ? 'Email' : 'Username'}
-                    </Label>
+                    <Label htmlFor="forgotUsername" className="text-slate-700 font-medium">Username</Label>
                     <Input
                       id="forgotUsername"
                       type="text"
-                      placeholder={forgotPasswordData.userType === 'reseller' ? 'Enter your email' : 'Enter your username'}
+                      placeholder="Enter your username"
                       value={forgotPasswordData.username}
                       onChange={(e) => setForgotPasswordData(prev => ({ ...prev, username: e.target.value }))}
                       className="h-11 border-slate-200 bg-white/50 focus:bg-white transition-colors"
