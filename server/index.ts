@@ -259,6 +259,16 @@ export function createServer() {
   app.post("/api/auth/generate-backup-codes", generateBackupCodes);
   app.get("/api/auth/2fa-status", check2FAStatus);
 
+  // Enhanced Authentication API routes
+  app.post("/api/auth/enhanced-login", enhancedLogin);
+  app.post("/api/auth/request-otp", requestOTP);
+  app.post("/api/auth/forgot-password", forgotPassword);
+  app.post("/api/auth/reset-password", resetPassword);
+  app.post("/api/auth/admin-reset-password", adminResetUserPassword);
+  app.post("/api/auth/toggle-forgot-password", toggleForgotPassword);
+  app.get("/api/auth/audit-logs", getAuditLogs);
+  app.get("/api/auth/signin-stats", getSignInStats);
+
   // Legacy demo endpoint
   app.get("/api/demo", handleDemo);
 
