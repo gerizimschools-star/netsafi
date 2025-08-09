@@ -130,6 +130,33 @@ export default function Index() {
     }));
   };
 
+  // Render 2FA verification screen
+  if (authStep === '2fa') {
+    return (
+      <TwoFactorVerification
+        onVerify={handleTwoFactorVerify}
+        onBack={handleBackToLogin}
+        isLoading={isLoading}
+        error={error}
+        userName={userName}
+      />
+    );
+  }
+
+  // Render 2FA setup screen
+  if (authStep === '2fa-setup') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <TwoFactorSetup
+          userId={tempUserId}
+          userType={formData.userType as 'admin' | 'reseller'}
+          onComplete={handleTwoFactorSetupComplete}
+          mandatory={true}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 lg:p-8">
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
