@@ -176,6 +176,9 @@ export default function EnhancedLogin() {
           title: "OTP Sent",
           description: `Verification code sent via ${method}`,
         });
+
+        // Fetch the OTP for development mode
+        setTimeout(fetchDevOTP, 500);
       } else {
         setError(data.message || 'Failed to send OTP');
       }
