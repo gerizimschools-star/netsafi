@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { query, run, get } from "../database-unified";
+import { SecurityConfigService } from "./securityConfigService";
 
 export interface OTPConfig {
   expirationMinutes: number;
