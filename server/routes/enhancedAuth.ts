@@ -534,6 +534,79 @@ export const getSignInStats: RequestHandler = async (req, res) => {
   }
 };
 
+// Get security configuration
+export const getSecurityConfig: RequestHandler = async (req, res) => {
+  try {
+    const config = await SecurityConfigService.getSecurityConfig();
+
+    res.json({
+      success: true,
+      config
+    });
+
+  } catch (error) {
+    console.error('Get security config error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve security configuration'
+    });
+  }
+};
+
+// Update security configuration
+export const updateSecurityConfig: RequestHandler = async (req, res) => {
+  try {
+    const { adminId, config } = req.body;
+
+    if (!adminId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    const result = await SecurityConfigService.updateSecurityConfig(adminId, config);
+
+    res.status(result.success ? 200 : 400).json(result);
+
+  } catch (error) {
+    console.error('Update security config error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update security configuration'
+    });
+  }
+};
+
+// Validate password against current policy
+export const validatePassword: RequestHandler = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password is required'
+      });
+    }
+
+    const result = await SecurityConfigService.validatePassword(password);
+
+    res.json({
+      success: result.isValid,
+      message: result.message,
+      isValid: result.isValid
+    });
+
+  } catch (error) {
+    console.error('Password validation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate password'
+    });
+  }
+};
+
 // Helper functions
 async function handleFailedLogin(
   userId: string,
