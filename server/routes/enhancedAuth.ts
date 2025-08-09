@@ -713,6 +713,27 @@ async function getAvailable2FAMethods(user: any): Promise<string[]> {
   return methods;
 }
 
+async function checkPasswordResetTrigger(
+  userId: string,
+  userType: string,
+  attemptsRemaining: number
+): Promise<boolean> {
+  try {
+    // Check if the feature is enabled in security config
+    const securityConfig = await SecurityConfigService.getSecurityConfig();
+
+    if (!securityConfig.resetPasswordAfterFailedOTPEnabled) {
+      return false;
+    }
+
+    // Check if this is the last attempt (attemptsRemaining = 0)
+    return attemptsRemaining === 0;
+  } catch (error) {
+    console.error('Error checking password reset trigger:', error);
+    return false;
+  }
+}
+
 async function verify2FAToken(
   userId: string,
   userType: string,
