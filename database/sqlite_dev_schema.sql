@@ -64,6 +64,11 @@ CREATE TABLE IF NOT EXISTS resellers (
     total_customers INTEGER DEFAULT 0,
     total_revenue DECIMAL(10,2) DEFAULT 0.00,
     last_login DATETIME,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    two_factor_secret TEXT,
+    two_factor_backup_codes TEXT,
+    two_factor_setup_at DATETIME,
+    two_factor_mandatory BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
