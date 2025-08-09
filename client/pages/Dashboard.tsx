@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { SecurityManagement } from "@/components/SecurityManagement";
 import {
   Card,
   CardContent,
