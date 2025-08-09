@@ -115,10 +115,10 @@ export const enhancedLogin: RequestHandler = async (req, res) => {
       }
 
       // Verify 2FA token
-      const verification = await this.verify2FAToken(
-        user.id, 
-        userType, 
-        twoFactorToken, 
+      const verification = await verify2FAToken(
+        user.id,
+        userType,
+        twoFactorToken,
         twoFactorMethod || 'totp',
         user
       );
