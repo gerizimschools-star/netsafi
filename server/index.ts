@@ -167,7 +167,16 @@ export function createServer() {
   }
 
   // Initialize database on startup
-  initializeDatabase();
+  initializeDatabase().then(async () => {
+    // Fix admin password for development
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        await import('./temp-fix-admin');
+      } catch (error) {
+        console.log('Admin fix script not needed or already run');
+      }
+    }
+  });
 
   // Health check endpoints
   app.get("/api/ping", (_req, res) => {
