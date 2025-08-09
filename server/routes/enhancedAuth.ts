@@ -213,10 +213,17 @@ export const requestOTP: RequestHandler = async (req, res) => {
     }
 
     // Get user contact information
-    const table = userType === 'reseller' ? 'resellers' : 
+    const table = userType === 'reseller' ? 'resellers' :
                  userType === 'customer' ? 'customer_users' : 'admin_users';
-    
-    const user = await get(`SELECT email, phone, first_name, contact_name FROM ${table} WHERE id = ?`, [userId]);
+
+    let user;
+    if (userType === 'reseller') {
+      user = await get(`SELECT email, phone, contact_name as first_name FROM ${table} WHERE id = ?`, [userId]);
+    } else if (userType === 'customer') {
+      user = await get(`SELECT email, phone, first_name FROM ${table} WHERE id = ?`, [userId]);
+    } else {
+      user = await get(`SELECT email, phone, first_name FROM ${table} WHERE id = ?`, [userId]);
+    }
     
     if (!user) {
       return res.status(404).json({
