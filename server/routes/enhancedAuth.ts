@@ -152,7 +152,7 @@ export const enhancedLogin: RequestHandler = async (req, res) => {
     }
 
     // Success - reset failed attempts and update last login
-    await this.handleSuccessfulLogin(user.id, userType);
+    await handleSuccessfulLogin(user.id, userType);
 
     // Generate JWT token
     const token = jwt.sign(
