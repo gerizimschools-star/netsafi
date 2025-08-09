@@ -162,9 +162,17 @@ class SQLiteDatabase {
 
       console.log('Filtered statements count:', statements.length);
 
-      // Debug: show first few statements
+      // Debug: show first few statements (both raw and filtered)
+      for (let i = 0; i < Math.min(3, rawStatements.length); i++) {
+        const trimmed = rawStatements[i].trim();
+        console.log(`Raw statement ${i + 1}:`, trimmed.substring(0, 100));
+        console.log(`  - Starts with --? ${trimmed.startsWith('--')}`);
+        console.log(`  - Starts with PRAGMA? ${trimmed.startsWith('PRAGMA')}`);
+        console.log(`  - Length: ${trimmed.length}`);
+      }
+
       for (let i = 0; i < Math.min(3, statements.length); i++) {
-        console.log(`Statement ${i + 1} preview:`, statements[i].substring(0, 100));
+        console.log(`Filtered statement ${i + 1} preview:`, statements[i].substring(0, 100));
       }
 
       // Execute each statement with error handling
