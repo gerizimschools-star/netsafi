@@ -2262,6 +2262,11 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
+            {/* Security Tab */}
+            <TabsContent value="security">
+              <SecurityManagement />
+            </TabsContent>
+
             {/* Settings Tab */}
             <TabsContent value="settings">
               <div className="grid gap-4 lg:gap-6">
