@@ -218,6 +218,12 @@ export default function EnhancedLogin() {
         if (data.attemptsRemaining !== undefined) {
           setAttemptsRemaining(data.attemptsRemaining);
         }
+
+        // Check if password reset should be shown after failed OTP attempts
+        if (data.showPasswordReset) {
+          setShowForgotPassword(true);
+          setForgotPasswordData(prev => ({ ...prev, username: formData.username }));
+        }
       }
     } catch (err) {
       setError('Network error occurred');
