@@ -7,6 +7,7 @@ import { TwoFactorService } from "../services/twoFactorService";
 import { OTPService } from "../services/otpService";
 import { PasswordService } from "../services/passwordService";
 import { AuditService } from "../services/auditService";
+import { SecurityConfigService } from "../services/securityConfigService";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = '24h';
