@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { get, run, query } from "../database-unified";
 
 export interface SecurityConfig {
