@@ -263,20 +263,35 @@ export class OTPService {
   }
 
   /**
-   * Send OTP via SMS (placeholder - integrate with SMS service)
+   * Send OTP via SMS - For admin, sends to special admin phone number
    */
   static async sendOTPSMS(
-    phone: string, 
-    code: string, 
+    phone: string,
+    code: string,
     purpose: string,
-    expiresAt: Date
+    expiresAt: Date,
+    userType?: string
   ): Promise<boolean> {
-    // TODO: Integrate with SMS service (Twilio, AWS SNS, etc.)
-    console.log(`[SMS OTP] To: ${phone}, Code: ${code}, Purpose: ${purpose}, Expires: ${expiresAt}`);
-    
-    // Simulate SMS sending
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(true), 100);
-    });
+    // For admin users, use the special admin phone number
+    const targetPhone = userType === 'admin' ? '0748261019' : phone;
+
+    try {
+      // TODO: Integrate with SMS service (Twilio, AWS SNS, etc.)
+      // For now, we'll log the SMS details and return success
+      console.log(`[SMS OTP] To: ${targetPhone}, Code: ${code}, Purpose: ${purpose}, Expires: ${expiresAt.toISOString()}`);
+      console.log(`SMS Message: "Your NetSafi verification code is: ${code}. Valid for ${Math.floor((expiresAt.getTime() - Date.now()) / 60000)} minutes. Do not share this code."`);
+
+      // In a real implementation, you would send the SMS here
+      // Example with a hypothetical SMS service:
+      // await smsService.send({
+      //   to: targetPhone,
+      //   message: `Your NetSafi verification code is: ${code}. Valid for ${Math.floor((expiresAt.getTime() - Date.now()) / 60000)} minutes. Do not share this code.`
+      // });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to send SMS OTP:', error);
+      return false;
+    }
   }
 }
