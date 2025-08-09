@@ -80,7 +80,7 @@ export const enhancedLogin: RequestHandler = async (req, res) => {
     const passwordValid = await bcrypt.compare(password, user.password_hash);
     if (!passwordValid) {
       // Increment failed attempts
-      await this.handleFailedLogin(user.id, userType, clientInfo);
+      await handleFailedLogin(user.id, userType, clientInfo);
 
       await AuditService.logSignInAttempt({
         userId: user.id,
