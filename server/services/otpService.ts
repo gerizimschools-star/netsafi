@@ -32,12 +32,14 @@ export class OTPService {
    * Generate and store OTP for user
    */
   static async generateOTP(
-    userId: string, 
+    userId: string,
     userType: 'admin' | 'reseller' | 'customer',
     purpose: 'login' | 'password_reset' | 'account_verification',
     config: Partial<OTPConfig> = {}
   ): Promise<OTPResult> {
-    const otpConfig = { ...this.DEFAULT_CONFIG, ...config };
+    // Get current security configuration
+    const securityConfig = await SecurityConfigService.getOTPConfig();
+    const otpConfig = { ...securityConfig, ...config };
     
     // Generate OTP code
     const code = this.generateNumericOTP(otpConfig.length);
