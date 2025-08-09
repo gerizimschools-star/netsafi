@@ -149,15 +149,21 @@ class SQLiteDatabase {
       console.log('Raw statements count:', rawStatements.length);
 
       const statements = rawStatements
-        .map(stmt => stmt.trim())
+        .map(stmt => {
+          // Remove comment lines but keep SQL lines
+          const lines = stmt.split('\n');
+          const sqlLines = lines
+            .map(line => line.trim())
+            .filter(line => line.length > 0 && !line.startsWith('--'));
+          return sqlLines.join('\n').trim();
+        })
         .filter(stmt => {
           // Remove empty statements
           if (stmt.length === 0) return false;
-          // Remove comment-only statements
-          if (stmt.startsWith('--')) return false;
           // Remove PRAGMA statements (they should be executed separately)
           if (stmt.startsWith('PRAGMA')) return false;
-          return true;
+          // Must contain some SQL
+          return stmt.length > 10;
         });
 
       console.log('Filtered statements count:', statements.length);
