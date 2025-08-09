@@ -251,14 +251,34 @@ export class OTPService {
    * Send OTP via email (placeholder - integrate with email service)
    */
   static async sendOTPEmail(
-    email: string, 
-    code: string, 
+    email: string,
+    code: string,
     purpose: string,
     expiresAt: Date
   ): Promise<boolean> {
     // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
-    console.log(`[EMAIL OTP] To: ${email}, Code: ${code}, Purpose: ${purpose}, Expires: ${expiresAt}`);
-    
+    console.log(`
+==================================================
+🔐 EMAIL OTP GENERATED FOR DEVELOPMENT
+==================================================
+To: ${email}
+Code: ${code}
+Purpose: ${purpose}
+Expires: ${expiresAt.toLocaleString()}
+==================================================
+`);
+
+    // In development, store the OTP for easy access
+    if (process.env.NODE_ENV === 'development') {
+      global.lastGeneratedOTP = {
+        code,
+        email,
+        purpose,
+        expiresAt,
+        timestamp: new Date()
+      };
+    }
+
     // Simulate email sending
     return new Promise((resolve) => {
       setTimeout(() => resolve(true), 100);
