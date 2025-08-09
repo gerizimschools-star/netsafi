@@ -491,6 +491,19 @@ export default function EnhancedLogin() {
                 </div>
               )}
 
+              {/* Development Helper - Shows current OTP code */}
+              {otpSent && process.env.NODE_ENV === 'development' && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center space-x-2 text-yellow-800">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-xs font-medium">DEV MODE: Check console logs for OTP code</span>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-1">
+                    The OTP code has been logged to the browser console and server logs.
+                  </p>
+                </div>
+              )}
+
               {/* Verification Code Input */}
               {(selectedMethod === 'totp' || selectedMethod === 'backup_code' || otpSent) && (
                 <div className="space-y-2">
