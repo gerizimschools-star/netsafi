@@ -1529,6 +1529,12 @@ export default function Dashboard() {
                   Portal
                 </TabsTrigger>
                 <TabsTrigger
+                  value="security"
+                  className="text-xs lg:text-sm px-2 lg:px-3"
+                >
+                  Security
+                </TabsTrigger>
+                <TabsTrigger
                   value="settings"
                   className="text-xs lg:text-sm px-2 lg:px-3"
                 >
