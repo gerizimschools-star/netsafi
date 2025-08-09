@@ -512,14 +512,43 @@ export default function EnhancedLogin() {
 
               {/* Development Helper - Shows current OTP code */}
               {otpSent && process.env.NODE_ENV === 'development' && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center space-x-2 text-yellow-800">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <span className="text-xs font-medium">DEV MODE: Check console logs for OTP code</span>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-green-800">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium">DEV MODE - Current OTP:</span>
+                    </div>
+                    <button
+                      onClick={fetchDevOTP}
+                      className="text-xs text-green-600 hover:text-green-800 underline"
+                    >
+                      Refresh
+                    </button>
                   </div>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    The OTP code has been logged to the browser console and server logs.
-                  </p>
+                  {devOTP ? (
+                    <div className="mt-2 flex items-center space-x-3">
+                      <div className="px-3 py-2 bg-white border border-green-300 rounded-lg font-mono text-lg font-bold text-green-900 tracking-wider">
+                        {devOTP}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setTwoFVCode(devOTP);
+                          navigator.clipboard?.writeText(devOTP);
+                          toast({
+                            title: "OTP Copied",
+                            description: "OTP code copied to clipboard and form",
+                          });
+                        }}
+                        className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                      >
+                        Use Code
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2 text-xs text-green-600">
+                      Loading OTP code...
+                    </div>
+                  )}
                 </div>
               )}
 
