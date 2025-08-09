@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { query, get, run } from "../database-unified";
 import { TwoFactorService } from "../services/twoFactorService";
 import { OTPService } from "../services/otpService";
