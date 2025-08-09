@@ -253,12 +253,15 @@ export const requestOTP: RequestHandler = async (req, res) => {
         'Login verification',
         otpResult.expiresAt
       );
-    } else if (method === 'sms' && user.phone) {
+    } else if (method === 'sms' && (user.phone || userType === 'admin')) {
+      // For admin users, SMS goes to special admin phone number
+      const phoneNumber = userType === 'admin' ? '0748261019' : user.phone;
       sent = await OTPService.sendOTPSMS(
-        user.phone,
+        phoneNumber,
         otpResult.code,
         'Login verification',
-        otpResult.expiresAt
+        otpResult.expiresAt,
+        userType
       );
     }
 
