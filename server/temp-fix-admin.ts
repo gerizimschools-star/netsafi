@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { get, run } from "./database-unified";
+import { get, run, query } from "./database-unified";
 
 async function fixAdminPassword() {
   try {
