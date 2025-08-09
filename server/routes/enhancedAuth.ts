@@ -137,11 +137,25 @@ export const enhancedLogin: RequestHandler = async (req, res) => {
           ...clientInfo
         });
 
-        return res.status(401).json({
+        // Check if password reset should be triggered after failed OTP attempts
+        const shouldTriggerReset = await checkPasswordResetTrigger(
+          user.id,
+          userType,
+          verification.attemptsRemaining || 0
+        );
+
+        const response: any = {
           success: false,
           message: verification.message,
           attemptsRemaining: verification.attemptsRemaining
-        });
+        };
+
+        if (shouldTriggerReset) {
+          response.showPasswordReset = true;
+          response.message = 'Maximum OTP attempts reached. You can reset your password to regain access.';
+        }
+
+        return res.status(401).json(response);
       }
     } else if (user.two_factor_mandatory && !user.two_factor_enabled) {
       // 2FA is mandatory but not set up
