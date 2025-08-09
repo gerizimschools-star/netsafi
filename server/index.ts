@@ -36,6 +36,16 @@ import {
   deleteNetworkLocation
 } from "./routes/network";
 
+// Import auth routes
+import {
+  login,
+  setup2FA,
+  verify2FA,
+  disable2FA,
+  generateBackupCodes,
+  check2FAStatus
+} from "./routes/auth";
+
 // Import new comprehensive route handlers
 import {
   getAllRouters,
