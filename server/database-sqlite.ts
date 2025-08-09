@@ -145,12 +145,27 @@ class SQLiteDatabase {
       console.log('Schema file read, length:', schema.length);
 
       // Split schema into individual statements
-      const statements = schema
-        .split(';')
-        .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.startsWith('PRAGMA'));
+      const rawStatements = schema.split(';');
+      console.log('Raw statements count:', rawStatements.length);
 
-      console.log('Total statements to execute:', statements.length);
+      const statements = rawStatements
+        .map(stmt => stmt.trim())
+        .filter(stmt => {
+          // Remove empty statements
+          if (stmt.length === 0) return false;
+          // Remove comment-only statements
+          if (stmt.startsWith('--')) return false;
+          // Remove PRAGMA statements (they should be executed separately)
+          if (stmt.startsWith('PRAGMA')) return false;
+          return true;
+        });
+
+      console.log('Filtered statements count:', statements.length);
+
+      // Debug: show first few statements
+      for (let i = 0; i < Math.min(3, statements.length); i++) {
+        console.log(`Statement ${i + 1} preview:`, statements[i].substring(0, 100));
+      }
 
       // Execute each statement with error handling
       for (let i = 0; i < statements.length; i++) {
