@@ -361,27 +361,11 @@ export default function EnhancedLogin() {
           {currentStep === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="userType" className="text-slate-700 font-medium">Account Type</Label>
-                <select
-                  id="userType"
-                  value={formData.userType}
-                  onChange={(e) => setFormData(prev => ({ ...prev, userType: e.target.value }))}
-                  className="w-full h-11 px-3 border border-slate-200 bg-white/50 focus:bg-white rounded-md transition-colors"
-                  disabled={isLoading}
-                >
-                  <option value="admin">Administrator</option>
-                  <option value="reseller">Reseller</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-slate-700 font-medium">
-                  {formData.userType === 'reseller' ? 'Email' : 'Username'}
-                </Label>
+                <Label htmlFor="username" className="text-slate-700 font-medium">Username</Label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder={formData.userType === 'reseller' ? 'Enter your email' : 'Enter your username'}
+                  placeholder="Enter your username"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
                   className="h-11 border-slate-200 bg-white/50 focus:bg-white transition-colors"
