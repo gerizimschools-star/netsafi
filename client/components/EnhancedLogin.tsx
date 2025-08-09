@@ -419,7 +419,6 @@ export default function EnhancedLogin() {
                   type="button"
                   onClick={() => {
                     setCurrentStep('forgot-password');
-                    setForgotPasswordData(prev => ({ ...prev, userType: formData.userType }));
                   }}
                   className="text-sm text-blue-600 hover:text-blue-700 underline"
                   disabled={isLoading}
