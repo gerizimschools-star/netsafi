@@ -677,6 +677,53 @@ export const cleanupAuditLogs: RequestHandler = async (req, res) => {
   }
 };
 
+// Development endpoint to get current OTP
+export const getDevOTP: RequestHandler = async (req, res) => {
+  // Only available in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({
+      success: false,
+      message: 'Endpoint not available in production'
+    });
+  }
+
+  try {
+    const lastOTP = (global as any).lastGeneratedOTP;
+
+    if (!lastOTP) {
+      return res.json({
+        success: false,
+        message: 'No OTP generated yet'
+      });
+    }
+
+    // Check if OTP is still valid
+    const now = new Date();
+    const isExpired = now > new Date(lastOTP.expiresAt);
+
+    res.json({
+      success: true,
+      otp: {
+        code: lastOTP.code,
+        email: lastOTP.email,
+        phone: lastOTP.phone,
+        purpose: lastOTP.purpose,
+        expiresAt: lastOTP.expiresAt,
+        generatedAt: lastOTP.timestamp,
+        isExpired,
+        timeRemaining: isExpired ? 0 : Math.max(0, new Date(lastOTP.expiresAt).getTime() - now.getTime())
+      }
+    });
+
+  } catch (error) {
+    console.error('Get dev OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get development OTP'
+    });
+  }
+};
+
 // Helper functions
 async function handleFailedLogin(
   userId: string,
