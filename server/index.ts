@@ -55,7 +55,10 @@ import {
   adminResetUserPassword,
   toggleForgotPassword,
   getAuditLogs,
-  getSignInStats
+  getSignInStats,
+  getSecurityConfig,
+  updateSecurityConfig,
+  validatePassword
 } from "./routes/enhancedAuth";
 
 // Import new comprehensive route handlers
