@@ -621,6 +621,62 @@ export const validatePassword: RequestHandler = async (req, res) => {
   }
 };
 
+// Get comprehensive security metrics
+export const getSecurityMetrics: RequestHandler = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    const filters: any = {};
+    if (startDate) filters.startDate = new Date(startDate as string);
+    if (endDate) filters.endDate = new Date(endDate as string);
+
+    const metrics = await AuditService.getSecurityMetrics(filters);
+
+    res.json({
+      success: true,
+      metrics
+    });
+
+  } catch (error) {
+    console.error('Get security metrics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve security metrics'
+    });
+  }
+};
+
+// Clean up old audit logs
+export const cleanupAuditLogs: RequestHandler = async (req, res) => {
+  try {
+    const { retentionDays } = req.body;
+
+    // Validate admin permissions (should be done with proper auth middleware)
+    // For now, we'll just validate that retentionDays is provided and reasonable
+    if (!retentionDays || retentionDays < 1 || retentionDays > 3650) {
+      return res.status(400).json({
+        success: false,
+        message: 'Retention days must be between 1 and 3650 days'
+      });
+    }
+
+    const cleanedCount = await AuditService.cleanupOldLogs(retentionDays);
+
+    res.json({
+      success: true,
+      message: `Cleaned up ${cleanedCount} old audit log entries`,
+      cleanedCount
+    });
+
+  } catch (error) {
+    console.error('Cleanup audit logs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cleanup audit logs'
+    });
+  }
+};
+
 // Helper functions
 async function handleFailedLogin(
   userId: string,
